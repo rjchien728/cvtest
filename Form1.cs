@@ -115,9 +115,10 @@ namespace cvtest
                 }
                 else if(radioButton2.Checked == true)
                 {
-
+                    facedetect();
                 }
             }
+
         }
 
 
@@ -149,9 +150,21 @@ namespace cvtest
             }
         }
 
-        private void facedetect(Bitmap bitmap)
+        private void facedetect()
         {
+            Image<Bgr, Byte> BgrFrame = webCam.QueryFrame();
+            //Image<Ycc, Byte> YcrCbFrame = BgrFrame.Convert<Ycc, Byte>();
 
+            if (BgrFrame != null)
+            {
+                Image<Gray, Byte> grayFrame = BgrFrame.Convert<Gray, Byte>();
+
+                var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
+
+                foreach (var face in detectedFaces)
+                    BgrFrame.Draw(face.rect, new Bgr(0, double.MaxValue, 0), 3);
+            }
+            pictureBox1.Image = BgrFrame.ToBitmap();
         }
 
 
