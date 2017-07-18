@@ -51,26 +51,6 @@ namespace cvtest
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            /*
-            Dcapture = new DirectX.Capture.Capture(
-            filters.VideoInputDevices[0], filters.AudioInputDevices[0]);
-
-            label2.Text = Dcapture.FrameRate.ToString();
-
-            Dcapture.VideoCompressor = filters.VideoCompressors[0];
-            Dcapture.AudioCompressor = filters.AudioCompressors[0];
-
-            Dcapture.FrameRate = 29.997;                 // NTSC
-            Dcapture.FrameSize = new Size(640, 480);   // 640x480
-            Dcapture.AudioSamplingRate = 44100;          // 44.1 kHz
-            Dcapture.AudioSampleSize = 16;               // 16-bit
-            Dcapture.AudioChannels = 1;                  // Mono
-
-            //Dcapture.Filename = "C:\MyVideo.avi";
-
-            Dcapture.Start();
-            //Dcapture.Stop();
-            */
             foreach (var c in _touch.Cameras)
                 comboBox1.Items.Add(c);
             comboBox1.SelectedIndex = 0;//default
@@ -87,25 +67,23 @@ namespace cvtest
             _barcodeReader = new BarcodeReader();
             haarCascade = new HaarCascade(@"haarcascade_frontalface_alt_tree.xml");
             label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
-            
+
             pictureBox1.Image = webCam.QueryFrame().ToBitmap();
-            
+
             this.Width = pictureBox1.Width + 100;
             this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
+
+            comboBox3.Items.Add("MJPG");
+            comboBox3.Items.Add("YUYV");
             //建立系統閒置處理程序
             Application.Idle += Application_Idle;
-
-            /*
-            timer = new DispatcherTimer();
-            timer.Tick += new EventHandler(Application_Idle);
-            timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
-            timer.Start();*/
-
         }
 
 
         private void Application_Idle(Object sender, EventArgs e)
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
             if (pause == false)
             {
                 pictureBox1.Image = webCam.QueryFrame().ToBitmap();
@@ -113,12 +91,13 @@ namespace cvtest
                 {
                     ReadBarcode(webCam.QueryFrame().ToBitmap());
                 }
-                else if(radioButton2.Checked == true)
+                else if (radioButton2.Checked == true)
                 {
-                    facedetect();
+                    FaceDetect();
                 }
             }
-
+            sw.Stop();
+            label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
         }
 
 
@@ -150,26 +129,30 @@ namespace cvtest
             }
         }
 
-        private void facedetect()
+        private void FaceDetect()
         {
             Image<Bgr, Byte> BgrFrame = webCam.QueryFrame();
+            Image<Bgr, Byte> SmallFrame = webCam.QuerySmallFrame();
             //Image<Ycc, Byte> YcrCbFrame = BgrFrame.Convert<Ycc, Byte>();
 
             if (BgrFrame != null)
             {
-                Image<Gray, Byte> grayFrame = BgrFrame.Convert<Gray, Byte>();
+                Image<Gray, Byte> grayFrame = SmallFrame.Convert<Gray, Byte>();
 
                 var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
 
                 foreach (var face in detectedFaces)
-                    BgrFrame.Draw(face.rect, new Bgr(0, double.MaxValue, 0), 3);
+                {
+                    Rectangle ori_rect = new Rectangle(face.rect.X * 2, face.rect.Y * 2, face.rect.Width * 2, face.rect.Height * 2);
+                    BgrFrame.Draw(ori_rect, new Bgr(0, 255, 255), 3);
+                }
             }
             pictureBox1.Image = BgrFrame.ToBitmap();
         }
 
 
 
-        private void LoadFrameSize (Emgu.CV.Capture cam)
+        private void LoadFrameSize(Emgu.CV.Capture cam)
         {
             comboBox2.Items.Clear();
             SortedSet<double> availwidth = new SortedSet<double>(); //all available capture width
@@ -184,7 +167,7 @@ namespace cvtest
                2048 x 1536
                2592 x 1944
              */
-             //設定解析度
+            //設定解析度
             int[] widthhh = { 160, 320, 480, 640, 800, 1280, 1600, 1920, 2048, 2592 };
             foreach (var w in widthhh)
             {
