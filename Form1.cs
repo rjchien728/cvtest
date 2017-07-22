@@ -20,7 +20,7 @@ using System.Diagnostics;
 using ZXing.QrCode;
 using ZXing;
 using TouchlessLib;
-using DirectX.Capture;
+//using DirectX.Capture;
 //using DirectShowLib;
 
 namespace cvtest

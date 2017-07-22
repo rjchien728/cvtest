@@ -35,28 +35,28 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(178, 334);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
+            this.textBox1.Location = new System.Drawing.Point(40, 67);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(642, 71);
+            this.textBox1.Size = new System.Drawing.Size(349, 29);
             this.textBox1.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(409, 196);
-            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label1.Location = new System.Drawing.Point(176, 25);
+            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(411, 61);
+            this.label1.Size = new System.Drawing.Size(137, 20);
             this.label1.TabIndex = 1;
             this.label1.Text = "請輸入認證密碼：";
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(886, 323);
-            this.button1.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
+            this.button1.Location = new System.Drawing.Point(414, 67);
+            this.button1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(162, 89);
+            this.button1.Size = new System.Drawing.Size(115, 32);
             this.button1.TabIndex = 2;
             this.button1.Text = "確認";
             this.button1.UseVisualStyleBackColor = true;
@@ -64,14 +64,14 @@
             // 
             // Form3
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(28F, 61F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1250, 544);
+            this.ClientSize = new System.Drawing.Size(573, 140);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
-            this.Font = new System.Drawing.Font("微軟正黑體", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
+            this.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.Name = "Form3";
             this.Text = "Form3";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form3_FormClosing);
