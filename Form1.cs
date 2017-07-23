@@ -36,9 +36,7 @@ namespace cvtest
         int hei = 480;//capture height
         Queue<double> frate = new Queue<double>();
         int Sindex;
-        //-----
-        //Filters filters = new Filters();
-        //DirectX.Capture.Capture Dcapture = null;
+        //bool rloadyet = false; 
 
         public Form1()
         {
@@ -58,18 +56,18 @@ namespace cvtest
             webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
             Sindex = comboBox1.SelectedIndex;
 
-            //LoadFrameSize(webCam);//get availible resolution
+            LoadFrameSize(ref webCam);
+
             //設定網路攝影機影像寬高為640x480
             webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
             webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
-            webCam.FlipHorizontal = true;
+            webCam.FlipHorizontal = false;
             //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 15);
             _barcodeReader = new BarcodeReader();
             haarCascade = new HaarCascade(@"haarcascade_frontalface_alt_tree.xml");
             label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
 
-            pictureBox1.Image = webCam.QueryFrame().ToBitmap();
-
+            pictureBox1.Image = webCam.QueryFrame().ToBitmap();//只取一張圖，調整Form大小
             this.Width = pictureBox1.Width + 100;
             this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
 
@@ -84,12 +82,16 @@ namespace cvtest
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Start();
+
             if (pause == false)
             {
                 pictureBox1.Image = webCam.QueryFrame().ToBitmap();
+                //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
+                Image<Bgr, Byte> Frame = webCam.QueryFrame();
                 if (radioButton1.Checked == true)
                 {
-                    ReadBarcode(webCam.QueryFrame().ToBitmap());
+                    //pictureBox1.Image = BgrFrame.ToBitmap();
+                    ReadBarcode(Frame.ToBitmap());
                 }
                 else if (radioButton2.Checked == true)
                 {
@@ -100,30 +102,21 @@ namespace cvtest
             label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
         }
 
-
-
         private void ReadBarcode(Bitmap bitmap)
         {
-            // Read barcodes with Dynamsoft Barcode Reader
-            Stopwatch sw = Stopwatch.StartNew();
-            //sw.Start();
-
             ZXing.Result result = _barcodeReader.Decode(bitmap);
-
-            //sw.Stop();
-            //label3.Text = sw.Elapsed.TotalMilliseconds + "ms";
             if (result != null)
             {
-
                 string rs = null;
                 rs += result.Text;
 
                 Form2 f = new Form2(rs);
-                pause = true;
+                pause = true;//暫停擷取影像
 
                 while (f.ShowDialog() != DialogResult.OK)
                 {
                     //do nothing
+                    //等待使用者關閉Form2
                 }
                 pause = false;
             }
@@ -138,9 +131,7 @@ namespace cvtest
             if (BgrFrame != null)
             {
                 Image<Gray, Byte> grayFrame = SmallFrame.Convert<Gray, Byte>();
-
                 var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
-
                 foreach (var face in detectedFaces)
                 {
                     Rectangle ori_rect = new Rectangle(face.rect.X * 2, face.rect.Y * 2, face.rect.Width * 2, face.rect.Height * 2);
@@ -152,21 +143,19 @@ namespace cvtest
 
 
 
-        private void LoadFrameSize(Emgu.CV.Capture cam)
+        private void LoadFrameSize(ref Emgu.CV.Capture cam)
         {
             comboBox2.Items.Clear();
             SortedSet<double> availwidth = new SortedSet<double>(); //all available capture width
             SortedSet<double> availheight = new SortedSet<double>(); // all available capture height
-
-            /*
-             * 640 x 480
-               800 x 600
-               1280 x 720
-               1600 x 1200
-               1920 x 1080
-               2048 x 1536
-               2592 x 1944
-             */
+            /*640 x 480
+              800 x 600
+              1280 x 720
+              1600 x 1200
+              1920 x 1080
+              2048 x 1536
+              2592 x 1944
+            */
             //設定解析度
             int[] widthhh = { 160, 320, 480, 640, 800, 1280, 1600, 1920, 2048, 2592 };
             foreach (var w in widthhh)
@@ -176,11 +165,18 @@ namespace cvtest
                 availheight.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT));
             }
 
-            //string ss = null;
-            foreach (var d in availwidth) comboBox2.Items.Add(d);//ss += d.ToString() + "\r\n";
-            comboBox2.Items.Add("-----");
-            foreach (var d in availheight) comboBox2.Items.Add(d);//ss += d.ToString() + "\r\n";
-            //MessageBox.Show(ss);
+            List<string> rlist = new List<string>();
+
+            foreach (var w in availwidth)
+                rlist.Add(w.ToString());
+            int a = 0;
+            foreach(var h in availheight)
+            {
+                rlist[a] += "x" + h;
+                a++;
+            }
+            foreach (var item in rlist)
+                comboBox2.Items.Add(item);
         }
         private void button1_Click(object sender, EventArgs e)//選裝置
         {
@@ -202,6 +198,16 @@ namespace cvtest
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox2_MouseClick(object sender, MouseEventArgs e)
+        {
+            LoadFrameSize(ref webCam);
         }
     }
 }

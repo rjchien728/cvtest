@@ -36,7 +36,7 @@
             // textBox1
             // 
             this.textBox1.Font = new System.Drawing.Font("微軟正黑體", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.textBox1.Location = new System.Drawing.Point(49, 69);
+            this.textBox1.Location = new System.Drawing.Point(49, 55);
             this.textBox1.Margin = new System.Windows.Forms.Padding(4);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
@@ -45,10 +45,10 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(361, 189);
+            this.button1.Location = new System.Drawing.Point(361, 172);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(115, 51);
+            this.button1.Size = new System.Drawing.Size(115, 34);
             this.button1.TabIndex = 1;
             this.button1.Text = "確定";
             this.button1.UseVisualStyleBackColor = true;
@@ -60,15 +60,15 @@
             this.label1.Location = new System.Drawing.Point(45, 31);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 20);
+            this.label1.Size = new System.Drawing.Size(77, 20);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Result:";
+            this.label1.Text = "條碼內容:";
             // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(525, 261);
+            this.ClientSize = new System.Drawing.Size(525, 227);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
