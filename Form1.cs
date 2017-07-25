@@ -61,13 +61,9 @@ namespace cvtest
             //設定網路攝影機影像寬高為640x480
             Setsize(wid, hei);
             webCam.FlipHorizontal = false;
-            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 15);
+            webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 30);
             _barcodeReader = new BarcodeReader();
             haarCascade = new HaarCascade(@"haarcascade_frontalface_alt_tree.xml");
-
-            //pictureBox1.Image = webCam.QueryFrame().ToBitmap();//只取一張圖，調整Form大小
-            //this.Width = pictureBox1.Width + 100;
-            //this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
 
             comboBox3.Items.Add("MJPG");
             comboBox3.Items.Add("YUYV");
@@ -218,7 +214,9 @@ namespace cvtest
 
         private void button3_Click(object sender, EventArgs e)//拍照
         {
-
+            pause = true;
+            //Bitmap currentframe = ;
+            pictureBox1.Image.Save(@"C:\out\ppp.jpg"); 
         }
 
         private void button4_Click(object sender, EventArgs e)//換解析度
@@ -238,6 +236,7 @@ namespace cvtest
             this.Width = pictureBox1.Width + 100;
             this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
             label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
+            Showcurrentframesize(ref webCam);
         }
     }
 }
