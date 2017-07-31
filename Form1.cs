@@ -38,7 +38,7 @@ namespace cvtest
         int Sindex;
         //bool rloadyet = false; 
 
-        Image<Ycc, Byte> YcrCbFrame = null;
+        Image<Ycc, UInt16> YcrCbFrame = null;
         Image<Bgr, Byte> BgrFrame = null;
 
         public Form1()
@@ -219,10 +219,9 @@ namespace cvtest
         //拍照
         private void button3_Click(object sender, EventArgs e)//拍照
         {
-            YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
+            YcrCbFrame = webCam.QueryFrame().Convert<Ycc, UInt16>();
             BgrFrame = webCam.QueryFrame();
             pause = true;
-            //
             button5.Visible = true;
             button6.Visible = true;
             button3.Visible = false;
