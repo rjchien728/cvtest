@@ -38,6 +38,9 @@ namespace cvtest
         int Sindex;
         //bool rloadyet = false; 
 
+        Image<Ycc, Byte> YcrCbFrame = null;
+        Image<Bgr, Byte> BgrFrame = null;
+
         public Form1()
         {
             InitializeComponent();
@@ -67,6 +70,7 @@ namespace cvtest
 
             comboBox3.Items.Add("MJPG");
             comboBox3.Items.Add("YUYV");
+            comboBox3.SelectedIndex = 1;
             //建立系統閒置處理程序
             Application.Idle += Application_Idle;
         }
@@ -164,7 +168,7 @@ namespace cvtest
             foreach (var w in availwidth)
                 rlist.Add(w.ToString());
             int a = 0;
-            foreach(var h in availheight)
+            foreach (var h in availheight)
             {
                 rlist[a] += "x" + h;
                 a++;
@@ -212,18 +216,60 @@ namespace cvtest
             Application.Exit();
         }
 
+        //拍照
         private void button3_Click(object sender, EventArgs e)//拍照
         {
+            YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
+            BgrFrame = webCam.QueryFrame();
             pause = true;
-            //Bitmap currentframe = ;
-            pictureBox1.Image.Save(@"C:\out\ppp.jpg"); 
+            //
+            button5.Visible = true;
+            button6.Visible = true;
+            button3.Visible = false;
         }
+
+        //儲存
+        private void button5_Click(object sender, EventArgs e)
+        {
+            string savefilename = null;
+            SaveFileDialog sf = new SaveFileDialog();
+            sf.Title = "儲存影像";
+            sf.Filter = "JPGE檔案(*.JPG)|*.jpg|Portable Network Graphic檔案(*.PNG)|*.PNG";
+            if (sf.ShowDialog() == DialogResult.OK)
+            {
+                savefilename = sf.FileName;
+                if (comboBox3.SelectedIndex == 0) //ycc
+                {
+                    YcrCbFrame.Save(savefilename);
+                }
+                else
+                {
+                    BgrFrame.Save(savefilename);
+                }
+                MessageBox.Show("儲存成功");
+            }
+            else MessageBox.Show("儲存失敗");
+            button5.Visible = false;
+            button6.Visible = false;
+            button3.Visible = true;
+            pause = false;
+        }
+
+        //取消
+        private void button6_Click(object sender, EventArgs e)
+        {
+            button5.Visible = false;
+            button6.Visible = false;
+            button3.Visible = true;
+            pause = false;
+        }
+
 
         private void button4_Click(object sender, EventArgs e)//換解析度
         {
             string content = comboBox2.SelectedItem.ToString();
             wid = int.Parse(content.Substring(0, content.IndexOf("x")));
-            hei = int.Parse(content.Substring(content.IndexOf("x") + 1,content.Length- content.IndexOf("x")-1));
+            hei = int.Parse(content.Substring(content.IndexOf("x") + 1, content.Length - content.IndexOf("x") - 1));
             //MessageBox.Show(wid + "x" + hei);
             Setsize(wid, hei);
         }
@@ -238,5 +284,6 @@ namespace cvtest
             label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
             Showcurrentframesize(ref webCam);
         }
+
     }
 }
