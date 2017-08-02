@@ -34,12 +34,17 @@ namespace cvtest
         private TouchlessMgr _touch;
         int wid = 640;//capture width
         int hei = 480;//capture height
-        Queue<double> frate = new Queue<double>();
+        int fps;
+        Queue<double> frate = new Queue<double>();//算平均
         int Sindex;
         //bool rloadyet = false; 
 
-        Image<Ycc, UInt16> YcrCbFrame = null;
+        Image<Ycc, Byte> YcrCbFrame = null;
         Image<Bgr, Byte> BgrFrame = null;
+        VideoWriter videowriter1;
+        string videoname;
+        string tempdic = @"C:\ProgramData\webcam\";
+        bool isrecording = false;
 
         public Form1()
         {
@@ -95,8 +100,18 @@ namespace cvtest
                 {
                     FaceDetect();
                 }
+
+                //錄影
+                if (isrecording)
+                {
+                    //int i = Int32.Parse(label2.Text);
+                    //i++;
+                    //label2.Text = i.ToString();
+                    videowriter1.WriteFrame<Bgr, byte>(Frame);
+                }
             }
             sw.Stop();
+            fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
             label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
         }
 
@@ -219,7 +234,7 @@ namespace cvtest
         //拍照
         private void button3_Click(object sender, EventArgs e)//拍照
         {
-            YcrCbFrame = webCam.QueryFrame().Convert<Ycc, UInt16>();
+            YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
             BgrFrame = webCam.QueryFrame();
             pause = true;
             button5.Visible = true;
@@ -284,5 +299,46 @@ namespace cvtest
             Showcurrentframesize(ref webCam);
         }
 
+        private void button7_Click(object sender, EventArgs e)
+        {
+            if (isrecording == false)
+            {
+                videoname = string.Format("{0}{1}{2}", tempdic, DateTime.Now.ToString("yyyyMMddHmmss"), ".avi");
+                videowriter1 = new VideoWriter(videoname, 0, fps, wid, hei, true);
+                isrecording = true;
+                button7.Text = "停止錄影";
+                ReverseEnable();
+            }
+            else
+            {
+                isrecording = false;
+                videowriter1.Dispose();//刪除videowriter物件
+                button7.Text = "開始錄影";
+                ReverseEnable();
+                //存檔
+                SaveFileDialog sf = new SaveFileDialog();
+                sf.Title = "儲存影片";
+                sf.Filter = "AVI檔案(*.AVI)|*.avi";
+                if (sf.ShowDialog() == DialogResult.OK)
+                {
+                    System.IO.File.Copy(videoname, sf.FileName, true);
+                    MessageBox.Show("儲存成功");
+                    System.IO.File.Delete(videoname);
+                }
+                else MessageBox.Show("儲存失敗");
+
+            }
+        }
+
+        private void ReverseEnable()
+        {
+            button1.Enabled = !button2.Enabled;
+            button2.Enabled = !button2.Enabled;
+            button3.Enabled = !button2.Enabled;
+            button4.Enabled = !button2.Enabled;
+            button5.Enabled = !button2.Enabled;
+            button6.Enabled = !button2.Enabled;
+            tabControl1.Enabled = !tabControl1.Enabled;
+        }
     }
 }
