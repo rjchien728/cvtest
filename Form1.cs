@@ -303,6 +303,8 @@ namespace cvtest
         {
             if (isrecording == false)
             {
+                if (!System.IO.Directory.Exists(tempdic))
+                    System.IO.Directory.CreateDirectory(tempdic);
                 videoname = string.Format("{0}{1}{2}", tempdic, DateTime.Now.ToString("yyyyMMddHmmss"), ".avi");
                 videowriter1 = new VideoWriter(videoname, 0, fps, wid, hei, true);
                 isrecording = true;
