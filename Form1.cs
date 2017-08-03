@@ -91,17 +91,6 @@ namespace cvtest
                 pictureBox1.Image = webCam.QueryFrame().ToBitmap();
                 //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
                 Image<Bgr, Byte> Frame = webCam.QueryFrame();
-                if (radioButton1.Checked == true)
-                {
-                    //pictureBox1.Image = BgrFrame.ToBitmap();
-                    ReadBarcode(Frame.ToBitmap());
-                }
-                else if (radioButton2.Checked == true)
-                {
-                    FaceDetect();
-                }
-
-                //錄影
                 if (isrecording)
                 {
                     //int i = Int32.Parse(label2.Text);
@@ -109,6 +98,20 @@ namespace cvtest
                     //label2.Text = i.ToString();
                     videowriter1.WriteFrame<Bgr, byte>(Frame);
                 }
+                else
+                {
+                    if (radioButton1.Checked == true)
+                    {
+                        //pictureBox1.Image = BgrFrame.ToBitmap();
+                        ReadBarcode(Frame.ToBitmap());
+                    }
+                    else if (radioButton2.Checked == true)
+                    {
+                        FaceDetect();
+                    }
+                }
+                //錄影
+                
             }
             sw.Stop();
             fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
@@ -327,7 +330,12 @@ namespace cvtest
                     MessageBox.Show("儲存成功");
                     System.IO.File.Delete(videoname);
                 }
-                else MessageBox.Show("儲存失敗");
+                else
+                {
+                    MessageBox.Show("儲存失敗");
+                    System.IO.File.Delete(videoname);
+                }
+
 
             }
         }
