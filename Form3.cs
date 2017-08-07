@@ -39,7 +39,6 @@ namespace cvtest
                 Form1 cvform = new Form1();
                 cvform.ShowDialog(this);
                 this.Visible = false;
-
             }
 
         }

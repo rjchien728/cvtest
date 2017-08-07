@@ -27,6 +27,8 @@ namespace cvtest
 {
     public partial class Form1 : Form
     {
+        Timer _timer;
+
         Emgu.CV.Capture webCam;
         private BarcodeReader _barcodeReader;
         private HaarCascade haarCascade;
@@ -46,6 +48,7 @@ namespace cvtest
         string tempdic = @"C:\ProgramData\webcam\";
         bool isrecording = false;
 
+
         public Form1()
         {
             InitializeComponent();
@@ -55,8 +58,13 @@ namespace cvtest
             //this.Height = 1800;
         }
 
+
         private void Form1_Load(object sender, EventArgs e)
         {
+            string defaultpath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            textBox1.Text = defaultpath;
+            textBox2.Text = defaultpath;
+
             foreach (var c in _touch.Cameras)
                 comboBox1.Items.Add(c);
             comboBox1.SelectedIndex = 0;//default
@@ -78,7 +86,54 @@ namespace cvtest
             comboBox3.SelectedIndex = 1;
             //建立系統閒置處理程序
             Application.Idle += Application_Idle;
+
+            //_timer = new Timer();
+            //_timer.Interval = 100;
+            //_timer.Tick += new EventHandler(TimerEventProcessor);
+            //_timer.Start();
+
         }
+
+        //private void TimerEventProcessor(object sender, EventArgs e)
+        //{
+        //    Stopwatch sw = Stopwatch.StartNew();
+        //    sw.Start();
+
+        //    if (pause == false)
+        //    {
+        //        pictureBox1.Image = webCam.QueryFrame().ToBitmap();
+        //        //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
+        //        Image<Bgr, Byte> Frame = webCam.QueryFrame();
+        //        if (isrecording)
+        //        {
+        //            //int i = Int32.Parse(label2.Text);
+        //            //i++;
+        //            //label2.Text = i.ToString();
+        //            videowriter1.WriteFrame<Bgr, byte>(Frame);
+        //        }
+        //        else
+        //        {
+        //            if (radioButton1.Checked == true)
+        //            {
+        //                //pictureBox1.Image = BgrFrame.ToBitmap();
+        //                ReadBarcode(Frame.ToBitmap());
+        //            }
+        //            else if (radioButton2.Checked == true)
+        //            {
+        //                FaceDetect();
+        //            }
+        //        }
+        //        //錄影
+
+        //    }
+        //    sw.Stop();
+        //    try
+        //    {
+        //        fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
+        //    }
+        //    catch { fps = 0; }
+        //    label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
+        //}
 
 
         private void Application_Idle(Object sender, EventArgs e)
@@ -111,10 +166,14 @@ namespace cvtest
                     }
                 }
                 //錄影
-                
+
             }
             sw.Stop();
-            fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
+            try
+            {
+                fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
+            }
+            catch { fps = 0; }
             label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
         }
 
@@ -249,12 +308,12 @@ namespace cvtest
         private void button5_Click(object sender, EventArgs e)
         {
             string savefilename = null;
-            SaveFileDialog sf = new SaveFileDialog();
-            sf.Title = "儲存影像";
-            sf.Filter = "JPGE檔案(*.JPG)|*.jpg|Portable Network Graphic檔案(*.PNG)|*.PNG";
-            if (sf.ShowDialog() == DialogResult.OK)
-            {
-                savefilename = sf.FileName;
+            //SaveFileDialog sf = new SaveFileDialog();
+            //sf.Title = "儲存影像";
+            //sf.Filter = "JPGE檔案(*.JPG)|*.jpg|Portable Network Graphic檔案(*.PNG)|*.PNG";
+            //if (sf.ShowDialog() == DialogResult.OK)
+            //{
+                savefilename = textBox1.Text+ @"\"+DateTime.Now.ToString("yyyyMMddHmmss")+@".JPG";
                 if (comboBox3.SelectedIndex == 0) //ycc
                 {
                     YcrCbFrame.Save(savefilename);
@@ -263,9 +322,9 @@ namespace cvtest
                 {
                     BgrFrame.Save(savefilename);
                 }
-                MessageBox.Show("儲存成功");
-            }
-            else MessageBox.Show("儲存失敗");
+            //    MessageBox.Show("儲存成功");
+            //}
+            //else MessageBox.Show("儲存失敗");
             button5.Visible = false;
             button6.Visible = false;
             button3.Visible = true;
@@ -321,20 +380,31 @@ namespace cvtest
                 button7.Text = "開始錄影";
                 ReverseEnable();
                 //存檔
-                SaveFileDialog sf = new SaveFileDialog();
-                sf.Title = "儲存影片";
-                sf.Filter = "AVI檔案(*.AVI)|*.avi";
-                if (sf.ShowDialog() == DialogResult.OK)
+                DialogResult dialogResult = MessageBox.Show("是否保存影片?", "FACE_CODE", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
                 {
-                    System.IO.File.Copy(videoname, sf.FileName, true);
-                    MessageBox.Show("儲存成功");
+                    System.IO.File.Copy(videoname, textBox2.Text+@"\" +DateTime.Now.ToString("yyyyMMddHmmss")+@".avi", true);
+                    System.IO.File.Delete(videoname);
+
+                }
+                else if (dialogResult == DialogResult.No)
+                {
                     System.IO.File.Delete(videoname);
                 }
-                else
-                {
-                    MessageBox.Show("儲存失敗");
-                    System.IO.File.Delete(videoname);
-                }
+                //SaveFileDialog sf = new SaveFileDialog();
+                //sf.Title = "儲存影片";
+                //sf.Filter = "AVI檔案(*.AVI)|*.avi";
+                //if (sf.ShowDialog() == DialogResult.OK)
+                //{
+                //    System.IO.File.Copy(videoname, sf.FileName, true);
+                //    MessageBox.Show("儲存成功");
+                //    System.IO.File.Delete(videoname);
+                //}
+                //else
+                //{
+                //    MessageBox.Show("儲存失敗");
+                //    System.IO.File.Delete(videoname);
+                //}
 
 
             }
