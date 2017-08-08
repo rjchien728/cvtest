@@ -361,6 +361,7 @@ namespace cvtest
             Showcurrentframesize(ref webCam);
         }
 
+        //錄影
         private void button7_Click(object sender, EventArgs e)
         {
             if (isrecording == false)
