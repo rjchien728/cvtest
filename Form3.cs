@@ -19,7 +19,7 @@ namespace cvtest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text != "kevin666")
+            if (textBox1.Text != "kevin666")//123
             {
                 MessageBox.Show("密碼錯誤，請重新輸入");
             }
