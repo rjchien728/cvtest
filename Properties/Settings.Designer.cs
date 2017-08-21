@@ -22,17 +22,5 @@ namespace cvtest.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string passwordsetting {
-            get {
-                return ((string)(this["passwordsetting"]));
-            }
-            set {
-                this["passwordsetting"] = value;
-            }
-        }
     }
 }

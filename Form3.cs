@@ -17,6 +17,8 @@ namespace cvtest
         private const string _serialno2 = "PAKO39LLO"; //一個月
         private const string _serialno3 = "TE965017K"; //七天
         private string authofile = @"C:\ProgramData\System64\WindowsPowerShell\log.txt";
+        private string authodic = @"C:\ProgramData\System64\WindowsPowerShell";
+        private List<string> usedserialno;
 
         public Form3()
         {
@@ -25,66 +27,131 @@ namespace cvtest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text != "kevin666")
-            {
-                MessageBox.Show("密碼錯誤，請重新輸入");
-            }
+            bool pass = true;
+
+            if (!File.Exists(authofile))
+                autholize(textBox1.Text);
             else
             {
-                Form1 cvform = new Form1();
-                this.Visible = false;
-                cvform.ShowDialog(this);
+                foreach (var no in usedserialno)
+                {
+                    if (textBox1.Text == no)
+                    {
+                        MessageBox.Show("已過期的序號");
+                        pass = false;
+                    }
+                }
+                if (pass)
+                {
+                    autholize(textBox1.Text);
+                }
             }
         }
 
         private void Form3_Load(object sender, EventArgs e)
         {
-            this.textBox1.Text = Properties.Settings.Default.passwordsetting;
-            if (textBox1.Text == "kevin666")
+            if (File.Exists(authofile))
             {
-                Form1 cvform = new Form1();
-                cvform.ShowDialog(this);
-                this.Visible = false;
+                //autholize
+                string duedate = checkautho(authofile);
+                if (DateTime.Compare(DateTime.Now, Convert.ToDateTime(duedate)) > 0)//逾期
+                {
+                    MessageBox.Show("你的認證已逾期");
+                }
+                else
+                {
+                    openMain();
+                }
             }
+        }
+
+
+        private void openMain()
+        {
+            //Form1 cvform = new Form1();//進入主程式
+            //cvform.ShowDialog(this);
+            //this.Visible = false;
+
+            MessageBox.Show("OK");
         }
 
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Properties.Settings.Default.passwordsetting = this.textBox1.Text;
-            Properties.Settings.Default.Save();
+            //Properties.Settings.Default.passwordsetting = this.textBox1.Text;
+            //Properties.Settings.Default.Save();
         }
 
-        private void firstautholize()
+
+        private void autholize(string serialno)
         {
-            switch (textBox1.Text)
+            switch (serialno)
             {
                 case _serialno1:
-
-
+                    writeauthofile(serialno, DateTime.Now.AddDays(9999).ToShortDateString());
+                    openMain();
                     break;
                 case _serialno2:
-
-
+                    writeauthofile(serialno, DateTime.Now.AddDays(30).ToShortDateString());
+                    openMain();
                     break;
                 case _serialno3:
-
-
+                    writeauthofile(serialno, DateTime.Now.AddDays(7).ToShortDateString());
+                    openMain();
+                    break;
+                default:
+                    MessageBox.Show("認證序號有誤，請重新確認");
                     break;
             }
-
         }
 
 
-        private string getseralno()
+        private string checkautho(string file)
         {
-            string s = null;
-            using (StreamReader sr = new StreamReader(authofile))
+            usedserialno = new List<string>();
+            string no = null;
+            string date = null;
+            StreamReader sr = new StreamReader(authofile);
+            string line = null;
+            int lineno = 1;
+            while ((line = sr.ReadLine()) != null)
             {
+                if (lineno % 2 == 1)
+                {
+                    no = line;
+                    usedserialno.Add(no);
+                    //MessageBox.Show("No=" + no);
 
-
+                }
+                else
+                {
+                    date = line;
+                    //MessageBox.Show("Date=" + date);
+                }
+                lineno++;
             }
-
-                return s;
+            sr.Close();
+            return date;
         }
+
+        private void writeauthofile(string s, string duedate)
+        {
+            //FileStream fs;
+            //if (fexist == false)
+            //    fs = new FileStream(authofile, FileMode.CreateNew);
+            //else
+            //    fs = new FileStream(authofile, FileMode.Open);
+            if (!Directory.Exists(authodic))
+            {
+                System.IO.Directory.CreateDirectory(authodic);
+            }
+            StreamWriter sw = new StreamWriter(authofile, true);
+            sw.WriteLine(s);
+            sw.WriteLine(duedate);
+            sw.Flush();
+            sw.Close();
+            //fs.Close();
+        }
+
+
     }
 }
