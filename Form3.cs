@@ -68,11 +68,11 @@ namespace cvtest
 
         private void openMain()
         {
-            //Form1 cvform = new Form1();//進入主程式
-            //cvform.ShowDialog(this);
-            //this.Visible = false;
+            Form1 cvform = new Form1();//進入主程式
+            cvform.ShowDialog(this);
+            this.Visible = false;
 
-            MessageBox.Show("OK");
+            //MessageBox.Show("OK");
         }
 
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
