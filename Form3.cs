@@ -15,7 +15,7 @@ namespace cvtest
     {
         private const string _serialno1 = "HAK074W85"; //永久
         private const string _serialno2 = "PAKO39LLO"; //一個月
-        private const string _serialno3 = "TE965017K"; //七天
+        private const string _serialno3 = "7968EMRX7"; //七天
         private string authofile = @"C:\ProgramData\System64\WindowsPowerShell\log.txt";
         private string authodic = @"C:\ProgramData\System64\WindowsPowerShell";
         private List<string> usedserialno;
@@ -37,7 +37,7 @@ namespace cvtest
                 {
                     if (textBox1.Text == no)
                     {
-                        MessageBox.Show("已過期的序號");
+                        MessageBox.Show("已過期的序號", "FaceCode");
                         pass = false;
                     }
                 }
@@ -54,14 +54,18 @@ namespace cvtest
             {
                 //autholize
                 string duedate = checkautho(authofile);
-                if (DateTime.Compare(DateTime.Now, Convert.ToDateTime(duedate)) > 0)//逾期
+                try
                 {
-                    MessageBox.Show("你的認證已逾期");
+                    if (DateTime.Compare(DateTime.Now, Convert.ToDateTime(duedate)) > 0)//逾期
+                    {
+                        MessageBox.Show("你的認證已逾期", "FaceCode");
+                    }
+                    else
+                    {
+                        openMain();
+                    }
                 }
-                else
-                {
-                    openMain();
-                }
+                catch { MessageBox.Show("認證錯誤，請洽開發商\r\n錯誤代碼(4)", "FaceCode"); }
             }
         }
 
@@ -69,8 +73,8 @@ namespace cvtest
         private void openMain()
         {
             Form1 cvform = new Form1();//進入主程式
-            cvform.ShowDialog(this);
             this.Visible = false;
+            cvform.ShowDialog(this);
 
             //MessageBox.Show("OK");
         }
@@ -99,7 +103,7 @@ namespace cvtest
                     openMain();
                     break;
                 default:
-                    MessageBox.Show("認證序號有誤，請重新確認");
+                    MessageBox.Show("認證序號有誤，請重新確認","FaceCode");
                     break;
             }
         }
@@ -110,26 +114,34 @@ namespace cvtest
             usedserialno = new List<string>();
             string no = null;
             string date = null;
-            StreamReader sr = new StreamReader(authofile);
-            string line = null;
-            int lineno = 1;
-            while ((line = sr.ReadLine()) != null)
+            try
             {
-                if (lineno % 2 == 1)
+                StreamReader sr = new StreamReader(authofile);
+                string line = null;
+                int lineno = 1;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    no = line;
-                    usedserialno.Add(no);
-                    //MessageBox.Show("No=" + no);
+                    if (lineno % 2 == 1)
+                    {
+                        no = line;
+                        usedserialno.Add(no);
+                        //MessageBox.Show("No=" + no);
 
+                    }
+                    else
+                    {
+                        date = line;
+                        //MessageBox.Show("Date=" + date);
+                    }
+                    lineno++;
                 }
-                else
-                {
-                    date = line;
-                    //MessageBox.Show("Date=" + date);
-                }
-                lineno++;
+                sr.Close();
             }
-            sr.Close();
+            catch
+            {
+                MessageBox.Show("認證發生問題，請洽開發商\r\n錯誤代碼(1)", "FaceCode");
+                Application.Exit();
+            }
             return date;
         }
 
@@ -142,13 +154,27 @@ namespace cvtest
             //    fs = new FileStream(authofile, FileMode.Open);
             if (!Directory.Exists(authodic))
             {
-                System.IO.Directory.CreateDirectory(authodic);
+                try
+                {
+                    System.IO.Directory.CreateDirectory(authodic);
+                }
+                catch
+                {
+                    MessageBox.Show("認證發生問題，請洽開發商\r\n錯誤代碼(2)", "FaceCode");
+                }
             }
-            StreamWriter sw = new StreamWriter(authofile, true);
-            sw.WriteLine(s);
-            sw.WriteLine(duedate);
-            sw.Flush();
-            sw.Close();
+            try
+            {
+                StreamWriter sw = new StreamWriter(authofile, true);
+                sw.WriteLine(s);
+                sw.WriteLine(duedate);
+                sw.Flush();
+                sw.Close();
+            }
+            catch
+            {
+                MessageBox.Show("認證發生問題，請洽開發商\r\n錯誤代碼(3)", "FaceCode");
+            }
             //fs.Close();
         }
 

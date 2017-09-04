@@ -92,58 +92,16 @@ namespace cvtest
             comboBox3.Items.Add("YUYV");
             comboBox3.SelectedIndex = 1;
             //建立系統閒置處理程序
-            Application.Idle += Application_Idle;
+            //Application.Idle += Application_Idle;
 
-            //_timer = new Timer();
-            //_timer.Interval = 100;
-            //_timer.Tick += new EventHandler(TimerEventProcessor);
-            //_timer.Start();
+            _timer = new Timer();
+            _timer.Interval = 30;
+            _timer.Tick += new EventHandler(TimerEventProcessor);
+            _timer.Start();
 
         }
 
-        //private void TimerEventProcessor(object sender, EventArgs e)
-        //{
-        //    Stopwatch sw = Stopwatch.StartNew();
-        //    sw.Start();
-
-        //    if (pause == false)
-        //    {
-        //        pictureBox1.Image = webCam.QueryFrame().ToBitmap();
-        //        //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
-        //        Image<Bgr, Byte> Frame = webCam.QueryFrame();
-        //        if (isrecording)
-        //        {
-        //            //int i = Int32.Parse(label2.Text);
-        //            //i++;
-        //            //label2.Text = i.ToString();
-        //            videowriter1.WriteFrame<Bgr, byte>(Frame);
-        //        }
-        //        else
-        //        {
-        //            if (radioButton1.Checked == true)
-        //            {
-        //                //pictureBox1.Image = BgrFrame.ToBitmap();
-        //                ReadBarcode(Frame.ToBitmap());
-        //            }
-        //            else if (radioButton2.Checked == true)
-        //            {
-        //                FaceDetect();
-        //            }
-        //        }
-        //        //錄影
-
-        //    }
-        //    sw.Stop();
-        //    try
-        //    {
-        //        fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
-        //    }
-        //    catch { fps = 0; }
-        //    label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
-        //}
-
-
-        private void Application_Idle(Object sender, EventArgs e)
+        private void TimerEventProcessor(object sender, EventArgs e)
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Start();
@@ -184,6 +142,49 @@ namespace cvtest
             catch { fps = 0; }
             label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
         }
+
+
+        //private void Application_Idle(Object sender, EventArgs e)
+        //{
+        //    Stopwatch sw = Stopwatch.StartNew();
+        //    sw.Start();
+
+        //    if (pause == false)
+        //    {
+        //        pictureBox1.Image = webCam.QueryFrame().ToBitmap();
+        //        //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
+        //        Image<Bgr, Byte> Frame = webCam.QueryFrame();
+        //        if (isrecording)
+        //        {
+        //            //int i = Int32.Parse(label2.Text);
+        //            //i++;
+        //            //label2.Text = i.ToString();
+        //            videowriter1.WriteFrame<Bgr, byte>(Frame);
+        //        }
+        //        else
+        //        {
+        //            if (radioButton1.Checked == true)
+        //            {
+        //                //pictureBox1.Image = BgrFrame.ToBitmap();
+        //                ReadBarcode(Frame.ToBitmap());
+        //            }
+        //            else if (radioButton2.Checked == true)
+        //            {
+        //                FaceDetect();
+        //            }
+        //            else { }
+        //        }
+        //        //錄影
+
+        //    }
+        //    sw.Stop();
+        //    try
+        //    {
+        //        fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
+        //    }
+        //    catch { fps = 0; }
+        //    label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
+        //}
 
         private void ReadBarcode(Bitmap bitmap)
         {
