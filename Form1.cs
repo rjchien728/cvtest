@@ -65,6 +65,13 @@ namespace cvtest
             textBox1.Text = defaultpath;
             textBox2.Text = defaultpath;
 
+            if (_touch.Cameras.Count < 1)
+            {
+                MessageBox.Show("No webcam detected. Please check and restart the application.");
+                Close();
+                Environment.Exit(Environment.ExitCode);
+            }
+
             foreach (var c in _touch.Cameras)
                 comboBox1.Items.Add(c);
             comboBox1.SelectedIndex = 0;//default
@@ -164,6 +171,7 @@ namespace cvtest
                     {
                         FaceDetect();
                     }
+                    else { }
                 }
                 //錄影
 
@@ -261,7 +269,6 @@ namespace cvtest
             Sindex = comboBox1.SelectedIndex;
             webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
             webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
-            comboBox2.Items.Clear();
             LoadFrameSize(ref webCam);
             Showcurrentframesize(ref webCam);
             pause = false;
@@ -276,8 +283,12 @@ namespace cvtest
             {
                 if (w == i.ToString())
                 {
-                    comboBox2.SelectedIndex = index;
-                    break;
+                    try
+                    {
+                        comboBox2.SelectedIndex = index;
+                        break;
+                    }
+                    catch { }
                 }
                 else index++;
             }
