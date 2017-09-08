@@ -21,12 +21,14 @@ using ZXing.QrCode;
 using ZXing;
 using TouchlessLib;
 //using DirectX.Capture;
-//using DirectShowLib;
+using Camera_NET;
+using DirectShowLib;
 
 namespace cvtest
 {
     public partial class Form1 : Form
     {
+
         Timer _timer;
 
         Emgu.CV.Capture webCam;
@@ -56,6 +58,11 @@ namespace cvtest
             //comboBox1.SelectedIndex = 0;
             //this.Width = 900;
             //this.Height = 1800;
+
+
+            // Camera choice helper class
+            CameraChoice _CameraChoice = new CameraChoice();
+            _CameraChoice.UpdateDeviceList();
         }
 
 
