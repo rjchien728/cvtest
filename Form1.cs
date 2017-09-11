@@ -63,6 +63,11 @@ namespace cvtest
             // Camera choice helper class
             CameraChoice _CameraChoice = new CameraChoice();
             _CameraChoice.UpdateDeviceList();
+            string s = null;
+            foreach(var c in _CameraChoice.Devices)
+            {
+
+            }
         }
 
 
