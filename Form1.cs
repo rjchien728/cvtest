@@ -32,10 +32,12 @@ namespace cvtest
         Timer _timer;
 
         Emgu.CV.Capture webCam;
+
+        CameraChoice _CameraChoice;
         private BarcodeReader _barcodeReader;
         private HaarCascade haarCascade;
         bool pause = false;
-        private TouchlessMgr _touch;
+        //private TouchlessMgr _touch;
         int wid = 640;//capture width
         int hei = 480;//capture height
         int fps;
@@ -54,21 +56,12 @@ namespace cvtest
         public Form1()
         {
             InitializeComponent();
-            _touch = new TouchlessMgr();
+            _CameraChoice = new CameraChoice();
+
+            //_touch = new TouchlessMgr();
             //comboBox1.SelectedIndex = 0;
             //this.Width = 900;
             //this.Height = 1800;
-
-
-            // Camera choice helper class
-            CameraChoice _CameraChoice = new CameraChoice();
-            _CameraChoice.UpdateDeviceList();
-            string s = null;
-            foreach(var c in _CameraChoice.Devices)
-            {
-                s += c.Tostring();
-            }
-            //var moniker = _CameraChoice.Devices[your_index].Mon;
         }
 
 
@@ -78,21 +71,24 @@ namespace cvtest
             textBox1.Text = defaultpath;
             textBox2.Text = defaultpath;
 
-            if (_touch.Cameras.Count < 1)
+            _CameraChoice.UpdateDeviceList();
+            if (_CameraChoice.Devices.Count < 1)
             {
                 MessageBox.Show("No webcam detected. Please check and restart the application.");
                 Close();
                 Environment.Exit(Environment.ExitCode);
             }
 
-            foreach (var c in _touch.Cameras)
-                comboBox1.Items.Add(c);
+            foreach (var c in _CameraChoice.Devices)
+                comboBox1.Items.Add(c.Name);
             comboBox1.SelectedIndex = 0;//default
             //取得第一支網路攝影機
             webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
             Sindex = comboBox1.SelectedIndex;
             //抓取解析度
-            LoadFrameSize(ref webCam);
+            //LoadFrameSize(ref webCam);
+            getResolution();
+
             Showcurrentframesize(ref webCam);
             //設定網路攝影機影像寬高為640x480
             Setsize(wid, hei);
@@ -238,43 +234,51 @@ namespace cvtest
             pictureBox1.Image = BgrFrame.ToBitmap();
         }
 
-
-
-        private void LoadFrameSize(ref Emgu.CV.Capture cam)
+        private void getResolution()
         {
-            comboBox2.Items.Clear();
-            SortedSet<double> availwidth = new SortedSet<double>(); //all available capture width
-            SortedSet<double> availheight = new SortedSet<double>(); // all available capture height
-            /*640 x 480
-              800 x 600
-              1280 x 720
-              1600 x 1200
-              1920 x 1080
-              2048 x 1536
-              2592 x 1944
-            */
-            //設定解析度
-            int[] widthhh = { 160, 320, 480, 640, 800, 1280, 1600, 1920, 2048, 2592 };
-            foreach (var w in widthhh)
+            var moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;//for getting resolution
+            ResolutionList resolutions = Camera_NET.Camera.GetResolutionList(moniker);
+            foreach (var r in resolutions)
             {
-                cam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, w);
-                availwidth.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH));
-                availheight.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT));
+                comboBox2.Items.Add(r);
             }
-
-            List<string> rlist = new List<string>();
-
-            foreach (var w in availwidth)
-                rlist.Add(w.ToString());
-            int a = 0;
-            foreach (var h in availheight)
-            {
-                rlist[a] += "x" + h;
-                a++;
-            }
-            foreach (var item in rlist)
-                comboBox2.Items.Add(item);
         }
+
+        //private void LoadFrameSize(ref Emgu.CV.Capture cam)
+        //{
+        //    comboBox2.Items.Clear();
+        //    SortedSet<double> availwidth = new SortedSet<double>(); //all available capture width
+        //    SortedSet<double> availheight = new SortedSet<double>(); // all available capture height
+        //    /*640 x 480
+        //      800 x 600
+        //      1280 x 720
+        //      1600 x 1200
+        //      1920 x 1080
+        //      2048 x 1536
+        //      2592 x 1944
+        //    */
+        //    //設定解析度
+        //    int[] widthhh = { 160, 320, 480, 640, 800, 1280, 1600, 1920, 2048, 2592 };
+        //    foreach (var w in widthhh)
+        //    {
+        //        cam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, w);
+        //        availwidth.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH));
+        //        availheight.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT));
+        //    }
+
+        //    List<string> rlist = new List<string>();
+
+        //    foreach (var w in availwidth)
+        //        rlist.Add(w.ToString());
+        //    int a = 0;
+        //    foreach (var h in availheight)
+        //    {
+        //        rlist[a] += "x" + h;
+        //        a++;
+        //    }
+        //    foreach (var item in rlist)
+        //        comboBox2.Items.Add(item);
+        //}
         private void button1_Click(object sender, EventArgs e)//選裝置
         {
             if (comboBox1.SelectedIndex == Sindex) return;
@@ -283,7 +287,9 @@ namespace cvtest
             Sindex = comboBox1.SelectedIndex;
             webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
             webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
-            LoadFrameSize(ref webCam);
+            //LoadFrameSize(ref webCam);
+            getResolution();
+
             Showcurrentframesize(ref webCam);
             pause = false;
             //LoadFrameSize(webCam);
@@ -338,15 +344,15 @@ namespace cvtest
             //sf.Filter = "JPGE檔案(*.JPG)|*.jpg|Portable Network Graphic檔案(*.PNG)|*.PNG";
             //if (sf.ShowDialog() == DialogResult.OK)
             //{
-                savefilename = textBox1.Text+ @"\"+DateTime.Now.ToString("yyyyMMddHmmss")+@".JPG";
-                if (comboBox3.SelectedIndex == 0) //ycc
-                {
-                    YcrCbFrame.Save(savefilename);
-                }
-                else
-                {
-                    BgrFrame.Save(savefilename);
-                }
+            savefilename = textBox1.Text + @"\" + DateTime.Now.ToString("yyyyMMddHmmss") + @".JPG";
+            if (comboBox3.SelectedIndex == 0) //ycc
+            {
+                YcrCbFrame.Save(savefilename);
+            }
+            else
+            {
+                BgrFrame.Save(savefilename);
+            }
             //    MessageBox.Show("儲存成功");
             //}
             //else MessageBox.Show("儲存失敗");
@@ -409,7 +415,7 @@ namespace cvtest
                 DialogResult dialogResult = MessageBox.Show("是否保存影片?", "FACE_CODE", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
-                    System.IO.File.Copy(videoname, textBox2.Text+@"\" +DateTime.Now.ToString("yyyyMMddHmmss")+@".avi", true);
+                    System.IO.File.Copy(videoname, textBox2.Text + @"\" + DateTime.Now.ToString("yyyyMMddHmmss") + @".avi", true);
                     System.IO.File.Delete(videoname);
 
                 }
