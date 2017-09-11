@@ -66,8 +66,9 @@ namespace cvtest
             string s = null;
             foreach(var c in _CameraChoice.Devices)
             {
-
+                s += c.Tostring();
             }
+            //var moniker = _CameraChoice.Devices[your_index].Mon;
         }
 
 
