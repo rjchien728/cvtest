@@ -31,9 +31,11 @@ namespace cvtest
 
         Timer _timer;
 
-        Emgu.CV.Capture webCam;
+        //Emgu.CV.Capture webCam;
 
         CameraChoice _CameraChoice;
+        System.Runtime.InteropServices.ComTypes.IMoniker _moniker;
+        CameraControl _cameraControl;
         private BarcodeReader _barcodeReader;
         private HaarCascade haarCascade;
         bool pause = false;
@@ -83,12 +85,13 @@ namespace cvtest
                 comboBox1.Items.Add(c.Name);
             comboBox1.SelectedIndex = 0;//default
             //取得第一支網路攝影機
-            webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
+            //var moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;
+            //webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
             Sindex = comboBox1.SelectedIndex;
             //抓取解析度
             //LoadFrameSize(ref webCam);
-            getResolution();
-
+            _moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;//for getting resolution
+            getResolution(_moniker);
             Showcurrentframesize(ref webCam);
             //設定網路攝影機影像寬高為640x480
             Setsize(wid, hei);
@@ -234,9 +237,9 @@ namespace cvtest
             pictureBox1.Image = BgrFrame.ToBitmap();
         }
 
-        private void getResolution()
+        private void getResolution(System.Runtime.InteropServices.ComTypes.IMoniker moniker)
         {
-            var moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;//for getting resolution
+            //var moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;//for getting resolution
             ResolutionList resolutions = Camera_NET.Camera.GetResolutionList(moniker);
             foreach (var r in resolutions)
             {
@@ -295,9 +298,12 @@ namespace cvtest
             //LoadFrameSize(webCam);
         }
 
-        private void Showcurrentframesize(ref Emgu.CV.Capture cam)
+        private void Showcurrentframesize(System.Runtime.InteropServices.ComTypes.IMoniker moniker)
         {
-            string w = cam.GetCaptureProperty((Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH)).ToString() + "x" + cam.GetCaptureProperty((Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT)).ToString();
+            //string w = cam.GetCaptureProperty((Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH)).ToString() + "x" + cam.GetCaptureProperty((Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT)).ToString();
+
+            Resolution resolution = Camera.GetResolutionList(moniker);
+            string w = 
             int index = 0;
             foreach (var i in comboBox2.Items)
             {
@@ -313,6 +319,7 @@ namespace cvtest
                 else index++;
             }
         }
+
 
         private void button2_Click(object sender, EventArgs e)
         {
