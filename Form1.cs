@@ -97,6 +97,7 @@ namespace cvtest
             _barcodeReader = new BarcodeReader();
             haarCascade = new HaarCascade(@"haarcascade_frontalface_alt_tree.xml");
 
+
             comboBox3.Items.Add("MJPG");
             comboBox3.Items.Add("YUYV");
             comboBox3.SelectedIndex = 1;
