@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using ZXing.QrCode;
 using ZXing;
-using TouchlessLib;
+//using TouchlessLib;
 //using DirectX.Capture;
 using Camera_NET;
 using DirectShowLib;
@@ -59,6 +59,7 @@ namespace cvtest
         {
             InitializeComponent();
             _CameraChoice = new CameraChoice();
+            _cameraControl = new CameraControl();
 
             //_touch = new TouchlessMgr();
             //comboBox1.SelectedIndex = 0;
@@ -92,11 +93,12 @@ namespace cvtest
             //LoadFrameSize(ref webCam);
             _moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;//for getting resolution
             getResolution(_moniker);
-            Showcurrentframesize(ref webCam);
+            _cameraControl.SetCamera(_moniker, null);
+            //Showcurrentframesize(ref webCam);
             //設定網路攝影機影像寬高為640x480
             Setsize(wid, hei);
-            webCam.FlipHorizontal = false;
-            webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 30);
+            //webCam.FlipHorizontal = false;
+            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 30);
             _barcodeReader = new BarcodeReader();
             haarCascade = new HaarCascade(@"haarcascade_frontalface_alt_tree.xml");
 
@@ -121,15 +123,15 @@ namespace cvtest
 
             if (pause == false)
             {
-                pictureBox1.Image = webCam.QueryFrame().ToBitmap();
+                pictureBox1.Image = _cameraControl.SnapshotSourceImage();//webCam.QueryFrame().ToBitmap();
                 //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
-                Image<Bgr, Byte> Frame = webCam.QueryFrame();
+                Image<Bgr, Byte> Frame = new Image<Bgr,Byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame();
                 if (isrecording)
                 {
                     //int i = Int32.Parse(label2.Text);
                     //i++;
                     //label2.Text = i.ToString();
-                    videowriter1.WriteFrame<Bgr, byte>(Frame);
+                    videowriter1.WriteFrame<Bgr, Byte>(Frame);
                 }
                 else
                 {
@@ -221,8 +223,8 @@ namespace cvtest
 
         private void FaceDetect()
         {
-            Image<Bgr, Byte> BgrFrame = webCam.QueryFrame();
-            Image<Bgr, Byte> SmallFrame = webCam.QuerySmallFrame();
+            Image<Bgr, Byte> BgrFrame = new Image<Bgr, byte>(_cameraControl.SnapshotSourceImage());
+            Image<Bgr, Byte> SmallFrame = new Image<Bgr, byte>(_cameraControl.SnapshotSourceImage());
             //Image<Ycc, Byte> YcrCbFrame = BgrFrame.Convert<Ycc, Byte>();
 
             if (BgrFrame != null)
@@ -231,7 +233,8 @@ namespace cvtest
                 var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
                 foreach (var face in detectedFaces)
                 {
-                    Rectangle ori_rect = new Rectangle(face.rect.X * 2, face.rect.Y * 2, face.rect.Width * 2, face.rect.Height * 2);
+                    //Rectangle ori_rect = new Rectangle(face.rect.X * 2, face.rect.Y * 2, face.rect.Width * 2, face.rect.Height * 2);
+                    Rectangle ori_rect = face.rect;
                     BgrFrame.Draw(ori_rect, new Bgr(0, 255, 255), 3);
                 }
             }
@@ -287,14 +290,16 @@ namespace cvtest
         {
             if (comboBox1.SelectedIndex == Sindex) return;
             pause = true;
-            webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
+            //webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
+            _moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;
+            //_cameraControl = _moniker
             Sindex = comboBox1.SelectedIndex;
-            webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
-            webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
+            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
+            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
             //LoadFrameSize(ref webCam);
-            getResolution();
+            getResolution(_moniker);
 
-            Showcurrentframesize(ref webCam);
+            //Showcurrentframesize(ref webCam);
             pause = false;
             //LoadFrameSize(webCam);
         }
@@ -303,28 +308,28 @@ namespace cvtest
         {
             //string w = cam.GetCaptureProperty((Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH)).ToString() + "x" + cam.GetCaptureProperty((Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT)).ToString();
 
-            Resolution resolution = Camera.GetResolutionList(moniker);
-            string w = 
-            int index = 0;
-            foreach (var i in comboBox2.Items)
-            {
-                if (w == i.ToString())
-                {
-                    try
-                    {
-                        comboBox2.SelectedIndex = index;
-                        break;
-                    }
-                    catch { }
-                }
-                else index++;
-            }
+            //Resolution resolution;
+            //string w = "";
+            //int index = 0;
+            //foreach (var i in comboBox2.Items)
+            //{
+            //    if (w == i.ToString())
+            //    {
+            //        try
+            //        {
+            //            comboBox2.SelectedIndex = index;
+            //            break;
+            //        }
+            //        catch { }
+            //    }
+            //    else index++;
+            //}
         }
 
 
         private void button2_Click(object sender, EventArgs e)
         {
-            webCam.FlipHorizontal = !webCam.FlipHorizontal;
+            //webCam.FlipHorizontal = !webCam.FlipHorizontal;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -335,8 +340,8 @@ namespace cvtest
         //拍照
         private void button3_Click(object sender, EventArgs e)//拍照
         {
-            YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
-            BgrFrame = webCam.QueryFrame();
+            YcrCbFrame = new Image<Ycc, byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame().Convert<Ycc, Byte>();
+            BgrFrame = new Image<Bgr, byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame();
             pause = true;
             button5.Visible = true;
             button6.Visible = true;
@@ -391,13 +396,13 @@ namespace cvtest
 
         private void Setsize(int w, int h)
         {
-            webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
-            webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
-            pictureBox1.Image = webCam.QueryFrame().ToBitmap();//只取一張圖，調整Form大小
-            this.Width = pictureBox1.Width + 100;
-            this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
-            label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
-            Showcurrentframesize(ref webCam);
+            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
+            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
+            //pictureBox1.Image = webCam.QueryFrame().ToBitmap();//只取一張圖，調整Form大小
+            //this.Width = pictureBox1.Width + 100;
+            //this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
+            //label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
+            //Showcurrentframesize(ref webCam);
         }
 
         //錄影
