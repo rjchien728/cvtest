@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,12 +44,13 @@ namespace cvtest
         int wid = 640;//capture width
         int hei = 480;//capture height
         int fps;
+        double totalsecond = 0;
         Queue<double> frate = new Queue<double>();//算平均
         int Sindex;
         //bool rloadyet = false; 
 
-        Image<Ycc, Byte> YcrCbFrame = null;
-        Image<Bgr, Byte> BgrFrame = null;
+        Image<Ycc, Byte> _YcrCbFrame = null;
+        Image<Bgr, Byte> _BgrFrame = null;
         VideoWriter videowriter1;
         string videoname;
         string tempdic = @"C:\ProgramData\webcam\";
@@ -93,10 +95,7 @@ namespace cvtest
             getResolution(_moniker);
             _cameraControl.SetCamera(_moniker, null);
             comboBox2.SelectedIndex = 0;
-            //設定網路攝影機影像寬高為640x480
-            Setsize();
-            //webCam.FlipHorizontal = false;
-            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 30);
+            label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
             _barcodeReader = new BarcodeReader();
             haarCascade = new HaarCascade(@"haarcascade_frontalface_alt_tree.xml");
 
@@ -149,58 +148,24 @@ namespace cvtest
 
             }
             sw.Stop();
+            double f = 1000 / sw.Elapsed.TotalMilliseconds;
             try
             {
-                fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
+                fps = Convert.ToInt32(f);
+                if (frate.Count >= 5)
+                {
+                    label3.Text = "FPS: " + Math.Round(totalsecond / frate.Count, 1).ToString();
+                    totalsecond = 0;
+                    frate.Clear();
+                }
+                frate.Enqueue(f);
+                totalsecond +=f;
             }
             catch { fps = 0; }
+
             if (Frame != null)
                 Frame.Dispose();
-            label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
         }
-
-
-        //private void Application_Idle(Object sender, EventArgs e)
-        //{
-        //    Stopwatch sw = Stopwatch.StartNew();
-        //    sw.Start();
-
-        //    if (pause == false)
-        //    {
-        //        pictureBox1.Image = webCam.QueryFrame().ToBitmap();
-        //        //Image<Ycc, Byte> YcrCbFrame = webCam.QueryFrame().Convert<Ycc, Byte>();
-        //        Image<Bgr, Byte> Frame = webCam.QueryFrame();
-        //        if (isrecording)
-        //        {
-        //            //int i = Int32.Parse(label2.Text);
-        //            //i++;
-        //            //label2.Text = i.ToString();
-        //            videowriter1.WriteFrame<Bgr, byte>(Frame);
-        //        }
-        //        else
-        //        {
-        //            if (radioButton1.Checked == true)
-        //            {
-        //                //pictureBox1.Image = BgrFrame.ToBitmap();
-        //                ReadBarcode(Frame.ToBitmap());
-        //            }
-        //            else if (radioButton2.Checked == true)
-        //            {
-        //                FaceDetect();
-        //            }
-        //            else { }
-        //        }
-        //        //錄影
-
-        //    }
-        //    sw.Stop();
-        //    try
-        //    {
-        //        fps = Convert.ToInt32(1000 / sw.Elapsed.TotalMilliseconds);
-        //    }
-        //    catch { fps = 0; }
-        //    label3.Text = "FPS: " + Math.Round((1000 / sw.Elapsed.TotalMilliseconds), 1).ToString();
-        //}
 
         private void ReadBarcode(Bitmap bitmap)
         {
@@ -224,18 +189,17 @@ namespace cvtest
 
         private void FaceDetect(Image<Bgr, Byte> BgrFrame)
         {
-            //Image<Bgr, Byte> BgrFrame = new Image<Bgr, byte>(_cameraControl.Snapshot Image());
-            //Image<Bgr, Byte> SmallFrame = new Image<Bgr, byte>(_cameraControl.Snapshot Image());
-            //Image<Ycc, Byte> YcrCbFrame = BgrFrame.Convert<Ycc, Byte>();
-
+            int targetW = 320;
+            int targetH = _height / (_width / targetW);
+            double shrinkRatio = _width / targetW;
+            Image<Bgr, Byte> SmallFrame = new Image<Bgr, byte>(ScaleImage(BgrFrame.ToBitmap(), targetW, targetH));
             if (BgrFrame != null)
             {
-                Image<Gray, Byte> grayFrame = BgrFrame.Convert<Gray, Byte>();
+                Image<Gray, Byte> grayFrame = SmallFrame.Convert<Gray, Byte>();
                 var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
                 foreach (var face in detectedFaces)
                 {
-                    //Rectangle ori_rect = new Rectangle(face.rect.X * 2, face.rect.Y * 2, face.rect.Width * 2, face.rect.Height * 2);
-                    Rectangle ori_rect = face.rect;
+                    Rectangle ori_rect = new Rectangle((int)(face.rect.X * shrinkRatio), (int)(face.rect.Y * shrinkRatio), (int)(face.rect.Width * shrinkRatio), (int)(face.rect.Height * shrinkRatio));
                     BgrFrame.Draw(ori_rect, new Bgr(0, 255, 255), 3);
                 }
             }
@@ -253,56 +217,14 @@ namespace cvtest
             comboBox2.SelectedIndex = 0;
         }
 
-        //private void LoadFrameSize(ref Emgu.CV.Capture cam)
-        //{
-        //    comboBox2.Items.Clear();
-        //    SortedSet<double> availwidth = new SortedSet<double>(); //all available capture width
-        //    SortedSet<double> availheight = new SortedSet<double>(); // all available capture height
-        //    /*640 x 480
-        //      800 x 600
-        //      1280 x 720
-        //      1600 x 1200
-        //      1920 x 1080
-        //      2048 x 1536
-        //      2592 x 1944
-        //    */
-        //    //設定解析度
-        //    int[] widthhh = { 160, 320, 480, 640, 800, 1280, 1600, 1920, 2048, 2592 };
-        //    foreach (var w in widthhh)
-        //    {
-        //        cam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, w);
-        //        availwidth.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH));
-        //        availheight.Add(cam.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT));
-        //    }
-
-        //    List<string> rlist = new List<string>();
-
-        //    foreach (var w in availwidth)
-        //        rlist.Add(w.ToString());
-        //    int a = 0;
-        //    foreach (var h in availheight)
-        //    {
-        //        rlist[a] += "x" + h;
-        //        a++;
-        //    }
-        //    foreach (var item in rlist)
-        //        comboBox2.Items.Add(item);
-        //}
         private void button1_Click(object sender, EventArgs e)//選裝置
         {
             if (comboBox1.SelectedIndex == Sindex) return;
             pause = true;
-            //webCam = new Emgu.CV.Capture(comboBox1.SelectedIndex);
             _moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;
-            //_cameraControl = _moniker
             Sindex = comboBox1.SelectedIndex;
-            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
-            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
-            //LoadFrameSize(ref webCam);
             getResolution(_moniker);
-
             pause = false;
-            //LoadFrameSize(webCam);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -318,8 +240,8 @@ namespace cvtest
         //拍照
         private void button3_Click(object sender, EventArgs e)//拍照
         {
-            YcrCbFrame = new Image<Ycc, byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame().Convert<Ycc, Byte>();
-            BgrFrame = new Image<Bgr, byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame();
+            _YcrCbFrame = new Image<Ycc, byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame().Convert<Ycc, Byte>();
+            _BgrFrame = new Image<Bgr, byte>(_cameraControl.SnapshotSourceImage());//webCam.QueryFrame();
             pause = true;
             button5.Visible = true;
             button6.Visible = true;
@@ -338,11 +260,11 @@ namespace cvtest
             savefilename = textBox1.Text + @"\" + DateTime.Now.ToString("yyyyMMddHmmss") + @".JPG";
             if (comboBox3.SelectedIndex == 0) //ycc
             {
-                YcrCbFrame.Save(savefilename);
+                _YcrCbFrame.Save(savefilename);
             }
             else
             {
-                BgrFrame.Save(savefilename);
+                _BgrFrame.Save(savefilename);
             }
             //    MessageBox.Show("儲存成功");
             //}
@@ -374,13 +296,6 @@ namespace cvtest
 
         private void Setsize()
         {
-            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, wid);
-            //webCam.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, hei);
-            //pictureBox1.Image = webCam.QueryFrame().ToBitmap();//只取一張圖，調整Form大小
-            //this.Width = pictureBox1.Width + 100;
-            //this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
-            //label1.Text = "解析度: <" + webCam.Width.ToString() + "x" + webCam.Height.ToString() + ">";
-            //Showcurrentframesize(ref webCam);
             pause = true;
             _cameraControl.SetCamera(_moniker, (Camera_NET.Resolution)comboBox2.SelectedItem);
             pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
@@ -450,5 +365,45 @@ namespace cvtest
             button6.Enabled = !button2.Enabled;
             tabControl1.Enabled = !tabControl1.Enabled;
         }
+
+        private static Bitmap ScaleImage(Bitmap pBmp, int pWidth, int pHeight)
+        {
+            try
+            {
+                Bitmap tmpBmp = new Bitmap(pWidth, pHeight);
+                Graphics tmpG = Graphics.FromImage(tmpBmp);
+
+                //tmpG.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                tmpG.DrawImage(pBmp,
+                                           new Rectangle(0, 0, pWidth, pHeight),
+                                           new Rectangle(0, 0, pBmp.Width, pBmp.Height),
+                                           GraphicsUnit.Pixel);
+                tmpG.Dispose();
+                return tmpBmp;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private int _width
+        {
+            get
+            {
+                string r = comboBox2.SelectedItem.ToString();
+                return int.Parse(r.Substring(0, r.IndexOf("x")));
+            }
+        }
+        private int _height
+        {
+            get
+            {
+                string r = comboBox2.SelectedItem.ToString();
+                return int.Parse(r.Substring(r.IndexOf("x")+1));
+            }
+        }
+
     }
 }

@@ -65,7 +65,7 @@ namespace cvtest
                         openMain();
                     }
                 }
-                catch { MessageBox.Show("認證錯誤，請洽開發商\r\n錯誤代碼(4)", "FaceCode"); }
+                catch { MessageBox.Show("認證錯誤或是系統發生中斷，請洽開發商\r\n錯誤代碼(4)", "FaceCode"); }
             }
         }
 
