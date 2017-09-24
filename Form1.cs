@@ -393,9 +393,9 @@ namespace cvtest
                 //tmpG.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
                 tmpG.DrawImage(pBmp,
-                                           new Rectangle(0, 0, pWidth, pHeight),
-                                           new Rectangle(0, 0, pBmp.Width, pBmp.Height),
-                                           GraphicsUnit.Pixel);
+                    new Rectangle(0, 0, pWidth, pHeight),
+                    new Rectangle(0, 0, pBmp.Width, pBmp.Height),
+                    GraphicsUnit.Pixel);
                 tmpG.Dispose();
                 return tmpBmp;
             }
