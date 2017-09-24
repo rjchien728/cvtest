@@ -66,10 +66,10 @@ namespace cvtest
 
         private void resetCamera(CameraChoice cchoice, CameraControl ccontrol)
         {
-            cchoice = new CameraChoice();
+            //cchoice = new CameraChoice();
             ccontrol = new CameraControl();
             _cameraControl.SetCamera(_moniker, null);
-            readResolution();
+            //readResolution();
         }
 
         private void readResolution()
