@@ -37,6 +37,7 @@ namespace cvtest
         CameraChoice _cameraChoice;
         System.Runtime.InteropServices.ComTypes.IMoniker _moniker;
         CameraControl _cameraControl;
+        ResolutionList _resolutions;
         private BarcodeReader _barcodeReader;
         private HaarCascade haarCascade;
         bool pause = false;
@@ -55,7 +56,7 @@ namespace cvtest
         string videoname;
         string tempdic = @"C:\ProgramData\webcam\";
         bool isrecording = false;
-
+        Stopwatch sw;
 
         public Form1()
         {
@@ -64,11 +65,13 @@ namespace cvtest
             _cameraControl = new CameraControl();
         }
 
-        private void resetCamera(CameraChoice cchoice, CameraControl ccontrol)
+        private void resetCamera(CameraChoice cchoice, ref CameraControl ccontrol)
         {
             //cchoice = new CameraChoice();
+            ccontrol = null;
             ccontrol = new CameraControl();
-            _cameraControl.SetCamera(_moniker, null);
+            //_cameraControl = ccontrol;
+            ccontrol.SetCamera(_moniker, null);
             //readResolution();
         }
 
@@ -122,7 +125,7 @@ namespace cvtest
 
         private void TimerEventProcessor(object sender, EventArgs e)
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            sw = Stopwatch.StartNew();
             sw.Start();
             Image<Bgr, Byte> Frame = null;
             if (pause == false)
@@ -166,7 +169,7 @@ namespace cvtest
                     frate.Clear();
                 }
                 frate.Enqueue(f);
-                totalsecond +=f;
+                totalsecond += f;
             }
             catch { fps = 0; }
 
@@ -215,8 +218,10 @@ namespace cvtest
 
         private void getResolution(System.Runtime.InteropServices.ComTypes.IMoniker moniker)
         {
-            ResolutionList resolutions = Camera_NET.Camera.GetResolutionList(moniker);
-            foreach (var r in resolutions)
+            if (_resolutions != null)
+                _resolutions.Clear();
+            _resolutions = Camera_NET.Camera.GetResolutionList(moniker);
+            foreach (var r in _resolutions)
             {
                 comboBox2.Items.Add(r);
             }
@@ -230,7 +235,7 @@ namespace cvtest
             _moniker = _cameraChoice.Devices[comboBox1.SelectedIndex].Mon;
             Sindex = comboBox1.SelectedIndex;
             getResolution(_moniker);
-            resetCamera(_cameraChoice,_cameraControl);
+            resetCamera(_cameraChoice, ref _cameraControl);
             pause = false;
         }
 
@@ -304,11 +309,12 @@ namespace cvtest
         private void Setsize()
         {
             pause = true;
-            resetCamera(_cameraChoice,_cameraControl);
+            resetCamera(_cameraChoice, ref _cameraControl);
 
             System.Threading.Thread.Sleep((int)1500);
 
-            _cameraControl.SetCamera(_moniker, (Camera_NET.Resolution)comboBox2.SelectedItem);
+            Camera_NET.Resolution r = _resolutions[comboBox2.SelectedIndex];
+            _cameraControl.SetCamera(_moniker, r);
             pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
             this.Width = pictureBox1.Width + 100;
             this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
@@ -412,7 +418,7 @@ namespace cvtest
             get
             {
                 string r = comboBox2.SelectedItem.ToString();
-                return int.Parse(r.Substring(r.IndexOf("x")+1));
+                return int.Parse(r.Substring(r.IndexOf("x") + 1));
             }
         }
 
