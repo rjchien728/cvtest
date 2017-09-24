@@ -34,7 +34,7 @@ namespace cvtest
 
         //Emgu.CV.Capture webCam;
 
-        CameraChoice _CameraChoice;
+        CameraChoice _cameraChoice;
         System.Runtime.InteropServices.ComTypes.IMoniker _moniker;
         CameraControl _cameraControl;
         private BarcodeReader _barcodeReader;
@@ -60,15 +60,32 @@ namespace cvtest
         public Form1()
         {
             InitializeComponent();
-            _CameraChoice = new CameraChoice();
+            _cameraChoice = new CameraChoice();
             _cameraControl = new CameraControl();
-
-            //_touch = new TouchlessMgr();
-            //comboBox1.SelectedIndex = 0;
-            //this.Width = 900;
-            //this.Height = 1800;
         }
 
+        private void resetCamera(CameraChoice cchoice, CameraControl ccontrol)
+        {
+            cchoice = new CameraChoice();
+            ccontrol = new CameraControl();
+            _cameraControl.SetCamera(_moniker, null);
+            readResolution();
+        }
+
+        private void readResolution()
+        {
+            _cameraChoice.UpdateDeviceList();
+            if (_cameraChoice.Devices.Count < 1)
+            {
+                MessageBox.Show("No webcam detected. Please check and restart the application.");
+                Close();
+                Environment.Exit(Environment.ExitCode);
+            }
+
+            foreach (var c in _cameraChoice.Devices)
+                comboBox1.Items.Add(c.Name);
+            comboBox1.SelectedIndex = 0;//default
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -76,22 +93,12 @@ namespace cvtest
             textBox1.Text = defaultpath;
             textBox2.Text = defaultpath;
 
-            _CameraChoice.UpdateDeviceList();
-            if (_CameraChoice.Devices.Count < 1)
-            {
-                MessageBox.Show("No webcam detected. Please check and restart the application.");
-                Close();
-                Environment.Exit(Environment.ExitCode);
-            }
-
-            foreach (var c in _CameraChoice.Devices)
-                comboBox1.Items.Add(c.Name);
-            comboBox1.SelectedIndex = 0;//default
+            readResolution();
             //取得第一支網路攝影機
             Sindex = comboBox1.SelectedIndex;
             //抓取解析度
             //LoadFrameSize(ref webCam);
-            _moniker = _CameraChoice.Devices[Sindex].Mon;//for getting resolution
+            _moniker = _cameraChoice.Devices[Sindex].Mon;//for getting resolution
             getResolution(_moniker);
             _cameraControl.SetCamera(_moniker, null);
             comboBox2.SelectedIndex = 0;
@@ -107,7 +114,7 @@ namespace cvtest
             //Application.Idle += Application_Idle;
 
             _timer = new Timer();
-            _timer.Interval = 30;
+            _timer.Interval = 30; //30毫秒更新一次
             _timer.Tick += new EventHandler(TimerEventProcessor);
             _timer.Start();
 
@@ -120,7 +127,7 @@ namespace cvtest
             Image<Bgr, Byte> Frame = null;
             if (pause == false)
             {
-                Frame = new Image<Bgr, Byte>(_cameraControl.SnapshotOutputImage());//webCam.QueryFrame();
+                Frame = new Image<Bgr, Byte>(_cameraControl.SnapshotOutputImage());
                 if (isrecording)
                 {
                     //int i = Int32.Parse(label2.Text);
@@ -208,7 +215,6 @@ namespace cvtest
 
         private void getResolution(System.Runtime.InteropServices.ComTypes.IMoniker moniker)
         {
-            //var moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;//for getting resolution
             ResolutionList resolutions = Camera_NET.Camera.GetResolutionList(moniker);
             foreach (var r in resolutions)
             {
@@ -221,9 +227,10 @@ namespace cvtest
         {
             if (comboBox1.SelectedIndex == Sindex) return;
             pause = true;
-            _moniker = _CameraChoice.Devices[comboBox1.SelectedIndex].Mon;
+            _moniker = _cameraChoice.Devices[comboBox1.SelectedIndex].Mon;
             Sindex = comboBox1.SelectedIndex;
             getResolution(_moniker);
+            resetCamera(_cameraChoice,_cameraControl);
             pause = false;
         }
 
@@ -297,6 +304,7 @@ namespace cvtest
         private void Setsize()
         {
             pause = true;
+            resetCamera(_cameraChoice,_cameraControl);
             _cameraControl.SetCamera(_moniker, (Camera_NET.Resolution)comboBox2.SelectedItem);
             pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
             this.Width = pictureBox1.Width + 100;
