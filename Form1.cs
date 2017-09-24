@@ -305,6 +305,9 @@ namespace cvtest
         {
             pause = true;
             resetCamera(_cameraChoice,_cameraControl);
+
+            System.Threading.Thread.Sleep((int)1500);
+
             _cameraControl.SetCamera(_moniker, (Camera_NET.Resolution)comboBox2.SelectedItem);
             pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
             this.Width = pictureBox1.Width + 100;
