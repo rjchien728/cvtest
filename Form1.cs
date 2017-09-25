@@ -135,11 +135,9 @@ namespace cvtest
             if (pause == false)
             {
                 Frame = new Image<Bgr, Byte>(_cameraControl.SnapshotOutputImage());
-                if (isrecording)
+                if (isrecording)//錄影
                 {
-                    //int i = Int32.Parse(label2.Text);
-                    //i++;
-                    //label2.Text = i.ToString();
+                    pictureBox1.Image = Frame.ToBitmap();
                     videowriter1.WriteFrame<Bgr, Byte>(Frame);
                 }
                 else
@@ -158,8 +156,6 @@ namespace cvtest
                         pictureBox1.Image = Frame.ToBitmap();
                     }
                 }
-                //錄影
-
             }
             sw.Stop();
             double f = 1000 / sw.Elapsed.TotalMilliseconds;
@@ -225,6 +221,7 @@ namespace cvtest
             if (_resolutions != null)
                 _resolutions.Clear();
             _resolutions = Camera_NET.Camera.GetResolutionList(moniker);
+            comboBox2.Items.Clear();
             foreach (var r in _resolutions)
             {
                 comboBox2.Items.Add(r);
