@@ -68,10 +68,10 @@ namespace cvtest
         private void resetCamera(CameraChoice cchoice, ref CameraControl ccontrol)
         {
             //cchoice = new CameraChoice();
-            ccontrol = null;
-            ccontrol = new CameraControl();
+            //ccontrol = null;
+            //ccontrol = new CameraControl();
             //_cameraControl = ccontrol;
-            ccontrol.SetCamera(_moniker, null);
+            _cameraControl.SetCamera(_moniker, null);
             //readResolution();
         }
 
@@ -116,11 +116,15 @@ namespace cvtest
             //建立系統閒置處理程序
             //Application.Idle += Application_Idle;
 
+            startCapture();
+        }
+
+        private void startCapture()
+        {
             _timer = new Timer();
             _timer.Interval = 30; //30毫秒更新一次
             _timer.Tick += new EventHandler(TimerEventProcessor);
             _timer.Start();
-
         }
 
         private void TimerEventProcessor(object sender, EventArgs e)
@@ -299,6 +303,8 @@ namespace cvtest
 
         private void button4_Click(object sender, EventArgs e)//換解析度
         {
+            button4.Enabled = false;
+            label7.Visible = false;
             string content = comboBox2.SelectedItem.ToString();
             wid = int.Parse(content.Substring(0, content.IndexOf("x")));
             hei = int.Parse(content.Substring(content.IndexOf("x") + 1, content.Length - content.IndexOf("x") - 1));
@@ -308,18 +314,32 @@ namespace cvtest
 
         private void Setsize()
         {
-            pause = true;
-            resetCamera(_cameraChoice, ref _cameraControl);
+            try
+            {
+                _timer.Stop();
+                resetCamera(_cameraChoice, ref _cameraControl);
+                System.Threading.Thread.Sleep((int)1000);
 
-            System.Threading.Thread.Sleep((int)1500);
-
-            Camera_NET.Resolution r = _resolutions[comboBox2.SelectedIndex];
-            _cameraControl.SetCamera(_moniker, r);
-            pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
-            this.Width = pictureBox1.Width + 100;
-            this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
-            label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
-            pause = false;
+                //pause = true;
+                Camera_NET.Resolution r = _resolutions[comboBox2.SelectedIndex];
+                _cameraControl.SetCamera(_moniker, r);
+                pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
+                this.Width = pictureBox1.Width + 100;
+                this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
+                label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
+                //pause = false;
+                startCapture();
+            }
+            catch
+            {
+                pictureBox1.Image = null;
+                label7.Location = new Point(pictureBox1.Location.X + ((pictureBox1.Width - label7.Width) / 2), pictureBox1.Location.Y + ((pictureBox1.Height - label7.Height) / 2));
+                label7.Visible = true;
+            }
+            finally
+            {
+                button4.Enabled = true;
+            }
         }
 
         //錄影
