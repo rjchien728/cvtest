@@ -158,7 +158,8 @@ namespace cvtest
                 }
             }
             sw.Stop();
-            double f = 1000 / sw.Elapsed.TotalMilliseconds;
+            double f = 1000 / (sw.Elapsed.TotalMilliseconds);
+            if (f > 30) f = 30;
             try
             {
                 fps = Convert.ToInt32(f);

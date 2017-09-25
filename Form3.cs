@@ -13,9 +13,9 @@ namespace cvtest
 {
     public partial class Form3 : Form
     {
-        private const string _serialno1 = "HAK074W85"; //永久
-        private const string _serialno2 = "PAKO39LLO"; //一個月
-        private const string _serialno3 = "7968EMRX7"; //七天
+        private const string _serialno1 = "PRTJ9690L"; //永久
+        private const string _serialno2 = "DK850HBKQ"; //一個月
+        private const string _serialno3 = "710100XUS"; //七天
         private string authofile = @"C:\ProgramData\System64\WindowsPowerShell\log.txt";
         private string authodic = @"C:\ProgramData\System64\WindowsPowerShell";
         private List<string> usedserialno;
