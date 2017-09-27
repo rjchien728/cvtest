@@ -57,8 +57,9 @@
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.button7 = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
+            this.button7 = new System.Windows.Forms.Button();
+            this.panel4 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -256,6 +257,7 @@
             // panel3
             // 
             resources.ApplyResources(this.panel3, "panel3");
+            this.panel3.Controls.Add(this.panel4);
             this.panel3.Controls.Add(this.label7);
             this.panel3.Controls.Add(this.button7);
             this.panel3.Controls.Add(this.panel1);
@@ -265,6 +267,11 @@
             this.panel3.Controls.Add(this.button3);
             this.panel3.Name = "panel3";
             // 
+            // label7
+            // 
+            resources.ApplyResources(this.label7, "label7");
+            this.label7.Name = "label7";
+            // 
             // button7
             // 
             resources.ApplyResources(this.button7, "button7");
@@ -272,10 +279,10 @@
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
-            // label7
+            // panel4
             // 
-            resources.ApplyResources(this.label7, "label7");
-            this.label7.Name = "label7";
+            resources.ApplyResources(this.panel4, "panel4");
+            this.panel4.Name = "panel4";
             // 
             // Form1
             // 
@@ -336,6 +343,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Panel panel4;
     }
 }
 

@@ -116,6 +116,12 @@ namespace cvtest
             //建立系統閒置處理程序
             //Application.Idle += Application_Idle;
 
+
+            this.panel4.Controls.Add(_cameraControl);
+            _cameraControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            _cameraControl.Location = new System.Drawing.Point(0, 0);
+            //_cameraControl.Size = new System.Drawing.Size(683, 540);
+
             startCapture();
         }
 
@@ -144,16 +150,18 @@ namespace cvtest
                 {
                     if (radioButton1.Checked == true)
                     {
+                        panel4.BringToFront();
                         pictureBox1.Image = Frame.ToBitmap();
                         ReadBarcode(Frame.ToBitmap());
                     }
                     else if (radioButton2.Checked == true)
                     {
+                        pictureBox1.BringToFront();
                         FaceDetect(Frame);
                     }
                     else
                     {
-                        pictureBox1.Image = Frame.ToBitmap();
+                        panel4.BringToFront();
                     }
                 }
             }
@@ -317,10 +325,11 @@ namespace cvtest
                 _timer.Stop();
                 resetCamera(_cameraChoice, ref _cameraControl);
                 System.Threading.Thread.Sleep((int)1000);
-
-                //pause = true;
                 Camera_NET.Resolution r = _resolutions[comboBox2.SelectedIndex];
                 _cameraControl.SetCamera(_moniker, r);
+
+                panel4.Size = new System.Drawing.Size(wid,hei);//直接show cameracontrol畫面
+
                 pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
                 this.Width = pictureBox1.Width + 100;
                 this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
