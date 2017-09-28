@@ -57,12 +57,14 @@ namespace cvtest
         string tempdic = @"C:\ProgramData\webcam\";
         bool isrecording = false;
         Stopwatch sw;
+        PictureBox pictureBox1;
 
         public Form1()
         {
             InitializeComponent();
             _cameraChoice = new CameraChoice();
             _cameraControl = new CameraControl();
+            pictureBox1 = new PictureBox();
         }
 
         private void resetCamera(CameraChoice cchoice, ref CameraControl ccontrol)
@@ -120,7 +122,13 @@ namespace cvtest
             this.panel4.Controls.Add(_cameraControl);
             _cameraControl.Dock = System.Windows.Forms.DockStyle.Fill;
             _cameraControl.Location = new System.Drawing.Point(0, 0);
-            //_cameraControl.Size = new System.Drawing.Size(683, 540);
+            _cameraControl.BackgroundImage = _cameraControl.SnapshotSourceImage();
+
+            _cameraControl.Controls.Add(pictureBox1);
+            pictureBox1.Dock = DockStyle.Top;
+            pictureBox1.Size = new System.Drawing.Size(100, 200);
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.BackColor = Color.Transparent;
 
             startCapture();
         }
@@ -143,25 +151,25 @@ namespace cvtest
                 Frame = new Image<Bgr, Byte>(_cameraControl.SnapshotOutputImage());
                 if (isrecording)//錄影
                 {
-                    pictureBox1.Image = Frame.ToBitmap();
+                    //pictureBox1.Image = Frame.ToBitmap();
                     videowriter1.WriteFrame<Bgr, Byte>(Frame);
                 }
                 else
                 {
                     if (radioButton1.Checked == true)
                     {
-                        panel4.BringToFront();
-                        pictureBox1.Image = Frame.ToBitmap();
+                        //panel4.BringToFront();
+                        //pictureBox1.Image = Frame.ToBitmap();
                         ReadBarcode(Frame.ToBitmap());
                     }
                     else if (radioButton2.Checked == true)
                     {
-                        pictureBox1.BringToFront();
+                        //pictureBox1.BringToFront();
                         FaceDetect(Frame);
                     }
                     else
                     {
-                        panel4.BringToFront();
+                        //panel4.BringToFront();
                     }
                 }
             }
@@ -222,7 +230,7 @@ namespace cvtest
                     BgrFrame.Draw(ori_rect, new Bgr(0, 255, 255), 3);
                 }
             }
-            pictureBox1.Image = BgrFrame.ToBitmap();
+            //pictureBox1.Image = BgrFrame.ToBitmap();
         }
 
         private void getResolution(System.Runtime.InteropServices.ComTypes.IMoniker moniker)
@@ -330,7 +338,7 @@ namespace cvtest
 
                 panel4.Size = new System.Drawing.Size(wid,hei);//直接show cameracontrol畫面
 
-                pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
+                //pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
                 this.Width = pictureBox1.Width + 100;
                 this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
                 label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
@@ -339,7 +347,7 @@ namespace cvtest
             }
             catch
             {
-                pictureBox1.Image = null;
+                //pictureBox1.Image = null;
                 label7.Location = new Point(pictureBox1.Location.X + ((pictureBox1.Width - label7.Width) / 2), pictureBox1.Location.Y + ((pictureBox1.Height - label7.Height) / 2));
                 label7.Visible = true;
             }
