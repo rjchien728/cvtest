@@ -57,14 +57,14 @@ namespace cvtest
         string tempdic = @"C:\ProgramData\webcam\";
         bool isrecording = false;
         Stopwatch sw;
-        PictureBox pictureBox1;
+        //PictureBox pictureBox1;
 
         public Form1()
         {
             InitializeComponent();
             _cameraChoice = new CameraChoice();
             _cameraControl = new CameraControl();
-            pictureBox1 = new PictureBox();
+            //pictureBox1 = new PictureBox();
         }
 
         private void resetCamera(CameraChoice cchoice, ref CameraControl ccontrol)
@@ -105,7 +105,7 @@ namespace cvtest
             //LoadFrameSize(ref webCam);
             _moniker = _cameraChoice.Devices[Sindex].Mon;//for getting resolution
             getResolution(_moniker);
-            _cameraControl.SetCamera(_moniker, null);
+            _cameraControl.SetCamera(_moniker, _resolutions[0]);
             comboBox2.SelectedIndex = 0;
             label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
             _barcodeReader = new BarcodeReader();
@@ -151,25 +151,21 @@ namespace cvtest
                 Frame = new Image<Bgr, Byte>(_cameraControl.SnapshotOutputImage());
                 if (isrecording)//錄影
                 {
-                    //pictureBox1.Image = Frame.ToBitmap();
                     videowriter1.WriteFrame<Bgr, Byte>(Frame);
                 }
                 else
                 {
-                    if (radioButton1.Checked == true)
+                    if (radioButton1.Checked == true)//條碼
                     {
-                        //panel4.BringToFront();
-                        //pictureBox1.Image = Frame.ToBitmap();
                         ReadBarcode(Frame.ToBitmap());
                     }
-                    else if (radioButton2.Checked == true)
+                    else if (radioButton2.Checked == true)//人臉
                     {
-                        //pictureBox1.BringToFront();
                         FaceDetect(Frame);
                     }
-                    else
+                    else//無
                     {
-                        //panel4.BringToFront();
+
                     }
                 }
             }
@@ -365,21 +361,19 @@ namespace cvtest
                 System.Threading.Thread.Sleep((int)1000);
                 Camera_NET.Resolution r = _resolutions[comboBox2.SelectedIndex];
                 _cameraControl.SetCamera(_moniker, r);
-
-                panel4.Size = new System.Drawing.Size(wid,hei);//直接show cameracontrol畫面
-
-                //pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
-                this.Width = panel4.Width + 100;
-                this.Height = panel4.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
+                panel4.Size = new System.Drawing.Size(wid,hei);
+                this.Width = panel4.Width + 110;
+                panel4.Location = new Point(50, panel4.Location.Y);
+                this.Height = panel4.Height + tabControl1.Height + panel1.Height + panel2.Height +150;
                 label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
                 //pause = false;
                 startCapture();
             }
             catch
             {
-                //pictureBox1.Image = null;
-                label7.Location = new Point(pictureBox1.Location.X + ((pictureBox1.Width - label7.Width) / 2), pictureBox1.Location.Y + ((pictureBox1.Height - label7.Height) / 2));
+                label7.Location = new Point(panel4.Location.X + ((panel4.Width - label7.Width) / 2), panel4.Location.Y + ((panel4.Height - label7.Height) / 2));
                 label7.Visible = true;
+                label7.BringToFront();
             }
             finally
             {
