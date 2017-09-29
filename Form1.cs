@@ -73,7 +73,7 @@ namespace cvtest
             //ccontrol = null;
             //ccontrol = new CameraControl();
             //_cameraControl = ccontrol;
-            _cameraControl.SetCamera(_moniker, null);
+            _cameraControl.SetCamera(_moniker, _resolutions[0]);
             //readResolution();
         }
 
@@ -122,13 +122,13 @@ namespace cvtest
             this.panel4.Controls.Add(_cameraControl);
             _cameraControl.Dock = System.Windows.Forms.DockStyle.Fill;
             _cameraControl.Location = new System.Drawing.Point(0, 0);
-            _cameraControl.BackgroundImage = _cameraControl.SnapshotSourceImage();
-
-            _cameraControl.Controls.Add(pictureBox1);
-            pictureBox1.Dock = DockStyle.Top;
-            pictureBox1.Size = new System.Drawing.Size(100, 200);
-            pictureBox1.Location = new Point(0, 0);
-            pictureBox1.BackColor = Color.Transparent;
+            //_cameraControl.BackgroundImage = _cameraControl.SnapshotSourceImage();
+            _cameraControl.MixerEnabled = true;
+            //_cameraControl.Controls.Add(pictureBox1);
+            //pictureBox1.Dock = DockStyle.Top;
+            //pictureBox1.Size = new System.Drawing.Size(100, 200);
+            //pictureBox1.Location = new Point(0, 0);
+            //pictureBox1.BackColor = Color.Transparent;
 
             startCapture();
         }
@@ -214,6 +214,25 @@ namespace cvtest
             }
         }
 
+        //private void FaceDetect(Image<Bgr, Byte> BgrFrame)
+        //{
+        //    int targetW = 320;
+        //    int targetH = _height / (_width / targetW);
+        //    double shrinkRatio = _width / targetW;
+        //    Image<Bgr, Byte> SmallFrame = new Image<Bgr, byte>(ScaleImage(BgrFrame.ToBitmap(), targetW, targetH));
+        //    if (BgrFrame != null)
+        //    {
+        //        Image<Gray, Byte> grayFrame = SmallFrame.Convert<Gray, Byte>();
+        //        var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
+        //        foreach (var face in detectedFaces)
+        //        {
+        //            Rectangle ori_rect = new Rectangle((int)(face.rect.X * shrinkRatio), (int)(face.rect.Y * shrinkRatio), (int)(face.rect.Width * shrinkRatio), (int)(face.rect.Height * shrinkRatio));
+        //            BgrFrame.Draw(ori_rect, new Bgr(0, 255, 255), 3);
+        //        }
+        //    }
+        //    //pictureBox1.Image = BgrFrame.ToBitmap();
+        //}
+
         private void FaceDetect(Image<Bgr, Byte> BgrFrame)
         {
             int targetW = 320;
@@ -224,13 +243,29 @@ namespace cvtest
             {
                 Image<Gray, Byte> grayFrame = SmallFrame.Convert<Gray, Byte>();
                 var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
+                updateFace(BgrFrame, detectedFaces);
+            }
+        }
+        private void updateFace(Image<Bgr, Byte> SourceImg, MCvAvgComp[] detectedFaces)
+        {
+
+            int targetW = 320;
+            int targetH = _height / (_width / targetW);
+            double shrinkRatio = _width / targetW;
+            Bitmap bmp = new Bitmap(SourceImg.Width, SourceImg.Height);
+            Graphics g = Graphics.FromImage(bmp);
+            g.Clear(_cameraControl.GDIColorKey);
+
+            if (detectedFaces.Length > 0)
+            {
                 foreach (var face in detectedFaces)
                 {
                     Rectangle ori_rect = new Rectangle((int)(face.rect.X * shrinkRatio), (int)(face.rect.Y * shrinkRatio), (int)(face.rect.Width * shrinkRatio), (int)(face.rect.Height * shrinkRatio));
-                    BgrFrame.Draw(ori_rect, new Bgr(0, 255, 255), 3);
+                    if (_cameraControl.MixerEnabled) g.DrawRectangle(new Pen(Color.Yellow, 3), ori_rect);
                 }
             }
-            //pictureBox1.Image = BgrFrame.ToBitmap();
+            _cameraControl.OverlayBitmap = bmp;
+            g.Dispose();
         }
 
         private void getResolution(System.Runtime.InteropServices.ComTypes.IMoniker moniker)
@@ -255,11 +290,6 @@ namespace cvtest
             getResolution(_moniker);
             resetCamera(_cameraChoice, ref _cameraControl);
             pause = false;
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            //webCam.FlipHorizontal = !webCam.FlipHorizontal;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -339,8 +369,8 @@ namespace cvtest
                 panel4.Size = new System.Drawing.Size(wid,hei);//直接show cameracontrol畫面
 
                 //pictureBox1.Image = _cameraControl.SnapshotOutputImage();//只取一張圖，調整Form大小
-                this.Width = pictureBox1.Width + 100;
-                this.Height = pictureBox1.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
+                this.Width = panel4.Width + 100;
+                this.Height = panel4.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
                 label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
                 //pause = false;
                 startCapture();
@@ -409,12 +439,11 @@ namespace cvtest
 
         private void ReverseEnable()
         {
-            button1.Enabled = !button2.Enabled;
-            button2.Enabled = !button2.Enabled;
-            button3.Enabled = !button2.Enabled;
-            button4.Enabled = !button2.Enabled;
-            button5.Enabled = !button2.Enabled;
-            button6.Enabled = !button2.Enabled;
+            button1.Enabled = !button1.Enabled;
+            button3.Enabled = !button3.Enabled;
+            button4.Enabled = !button4.Enabled;
+            button5.Enabled = !button5.Enabled;
+            button6.Enabled = !button6.Enabled;
             tabControl1.Enabled = !tabControl1.Enabled;
         }
 
