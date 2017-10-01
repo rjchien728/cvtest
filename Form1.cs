@@ -231,23 +231,23 @@ namespace cvtest
 
         private void FaceDetect(Image<Bgr, Byte> BgrFrame)
         {
-            int targetW = 320;
-            int targetH = _height / (_width / targetW);
+            double targetW = 320;
+            double targetH = _height / (_width / targetW);
             double shrinkRatio = _width / targetW;
             Image<Bgr, Byte> SmallFrame = new Image<Bgr, byte>(ScaleImage(BgrFrame.ToBitmap(), targetW, targetH));
             if (BgrFrame != null)
             {
                 Image<Gray, Byte> grayFrame = SmallFrame.Convert<Gray, Byte>();
                 var detectedFaces = grayFrame.DetectHaarCascade(haarCascade)[0];
-                updateFace(BgrFrame, detectedFaces);
+                updateFace(BgrFrame, detectedFaces, shrinkRatio);
             }
         }
-        private void updateFace(Image<Bgr, Byte> SourceImg, MCvAvgComp[] detectedFaces)
+        private void updateFace(Image<Bgr, Byte> SourceImg, MCvAvgComp[] detectedFaces, double shrinkRatio)
         {
 
-            int targetW = 320;
-            int targetH = _height / (_width / targetW);
-            double shrinkRatio = _width / targetW;
+            //int targetW = 320;
+            //int targetH = _height / (_width / targetW);
+            //double shrinkRatio = _width / targetW;
             Bitmap bmp = new Bitmap(SourceImg.Width, SourceImg.Height);
             Graphics g = Graphics.FromImage(bmp);
             g.Clear(_cameraControl.GDIColorKey);
@@ -281,11 +281,13 @@ namespace cvtest
         {
             if (comboBox1.SelectedIndex == Sindex) return;
             pause = true;
+            _timer.Stop();
             _moniker = _cameraChoice.Devices[comboBox1.SelectedIndex].Mon;
             Sindex = comboBox1.SelectedIndex;
             getResolution(_moniker);
             resetCamera(_cameraChoice, ref _cameraControl);
             pause = false;
+            startCapture();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -361,10 +363,11 @@ namespace cvtest
                 System.Threading.Thread.Sleep((int)1000);
                 Camera_NET.Resolution r = _resolutions[comboBox2.SelectedIndex];
                 _cameraControl.SetCamera(_moniker, r);
-                panel4.Size = new System.Drawing.Size(wid,hei);
+                _cameraControl.MixerEnabled = true;
+                panel4.Size = new System.Drawing.Size(wid, hei);
                 this.Width = panel4.Width + 110;
                 panel4.Location = new Point(50, panel4.Location.Y);
-                this.Height = panel4.Height + tabControl1.Height + panel1.Height + panel2.Height +150;
+                this.Height = panel4.Height + tabControl1.Height + panel1.Height + panel2.Height + 150;
                 label1.Text = "解析度: <" + comboBox2.SelectedItem + ">";
                 //pause = false;
                 startCapture();
@@ -441,17 +444,17 @@ namespace cvtest
             tabControl1.Enabled = !tabControl1.Enabled;
         }
 
-        private static Bitmap ScaleImage(Bitmap pBmp, int pWidth, int pHeight)
+        private static Bitmap ScaleImage(Bitmap pBmp, double pWidth, double pHeight)
         {
             try
             {
-                Bitmap tmpBmp = new Bitmap(pWidth, pHeight);
+                Bitmap tmpBmp = new Bitmap(Convert.ToInt32(pWidth), Convert.ToInt32(pHeight));
                 Graphics tmpG = Graphics.FromImage(tmpBmp);
 
                 //tmpG.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
                 tmpG.DrawImage(pBmp,
-                    new Rectangle(0, 0, pWidth, pHeight),
+                    new Rectangle(0, 0, Convert.ToInt32(pWidth), Convert.ToInt32(pHeight)),
                     new Rectangle(0, 0, pBmp.Width, pBmp.Height),
                     GraphicsUnit.Pixel);
                 tmpG.Dispose();
@@ -467,7 +470,7 @@ namespace cvtest
         {
             get
             {
-                string r = comboBox2.SelectedItem.ToString();
+                string r = _cameraControl.Resolution.ToString();
                 return int.Parse(r.Substring(0, r.IndexOf("x")));
             }
         }
@@ -475,7 +478,7 @@ namespace cvtest
         {
             get
             {
-                string r = comboBox2.SelectedItem.ToString();
+                string r = _cameraControl.Resolution.ToString();
                 return int.Parse(r.Substring(r.IndexOf("x") + 1));
             }
         }
